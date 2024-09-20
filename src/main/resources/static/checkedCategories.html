@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Checked Categories</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-8 bg-gray-50 mx-auto max-w-4xl">
+<h1 class="text-4xl font-bold mb-6 text-center">공유된 카테고리</h1>
+<div id="checkedCategoryList" class="space-y-8"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const categories = JSON.parse(urlParams.get('categories'));
+
+        const checkedCategoryList = document.getElementById('checkedCategoryList');
+        categories.forEach(category => {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'bg-white p-6 rounded-lg shadow-lg';
+
+            const categoryTitle = document.createElement('h2');
+            categoryTitle.className = 'text-3xl font-semibold mb-4';
+            categoryTitle.textContent = category.name;
+            categoryDiv.appendChild(categoryTitle);
+
+            const productList = document.createElement('ul');
+            productList.className = 'space-y-6';
+
+            category.products.forEach(product => {
+                const productItem = document.createElement('li');
+                productItem.className = 'flex items-center space-x-6';
+
+                const productImage = document.createElement('img');
+                productImage.src = product.image;
+                productImage.className = 'w-24 h-24 object-cover rounded';
+
+                const productInfo = document.createElement('div');
+                productInfo.className = 'flex flex-col';
+
+                const productTitle = document.createElement('span');
+                productTitle.className = 'text-xl font-semibold';
+                productTitle.textContent = product.title;
+
+                const productPrice = document.createElement('span');
+                productPrice.className = 'text-gray-600 text-lg';
+                productPrice.textContent = product.lprice;
+
+                productInfo.appendChild(productTitle);
+                productInfo.appendChild(productPrice);
+
+                productItem.appendChild(productImage);
+                productItem.appendChild(productInfo);
+                productList.appendChild(productItem);
+            });
+
+            categoryDiv.appendChild(productList);
+            checkedCategoryList.appendChild(categoryDiv);
+        });
+    });
+</script>
+</body>
+</html>

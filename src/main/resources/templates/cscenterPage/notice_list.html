@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" crossorigin="anonymous"></script>
+    <title>공지사항</title>
+</head>
+<body class="bg-gray-100">
+<div layout:fragment="content" class="max-w-4xl mx-auto mt-8 p-4 bg-white shadow rounded-md">
+    <div class="flex">
+        <div class="text-gray-600 text-sm ml-12 font-semibold mb-4">현재 위치: 상담센터 > 공지사항</div>
+    </div>
+    <div class="mb-4 flex justify-between">
+        <div>
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/cscenter/noticelist/admin/notice/create}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">공지사항 등록하기</a>
+        </div>
+        <div class="flex">
+            <input type="text" id="search_kw" class="form-input rounded-l border-r-2 text-sm" th:value="${kw}" placeholder="검색어 입력">
+            <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded-r text-sm" type="button" id="btn_search">찾기</button>
+        </div>
+    </div>
+    <!-- 공지사항 목록 -->
+    <div th:if="${#lists.isEmpty(noticeList)}" class="flex items-center justify-center h-64 bg-gray-50 border border-gray-300 rounded-lg shadow-md p-8 mb-6 text-center text-gray-600 text-lg font-medium">
+        <p>게시된 공지사항이 없습니다.</p>
+    </div>
+    <ul role="list" class="divide-y divide-gray-200" th:unless="${#lists.isEmpty(noticeList)}">
+        <li th:each="notice : ${noticeList}" class="py-4">
+            <div class="flex items-center justify-between">
+                <a th:href="@{/cscenter/noticelist/{id}(id=${notice.id})}"
+                   class="text-xl font-semibold text-gray-900 ml-4 cursor-pointer hover:text-blue-600 transition-colors duration-300"
+                   th:text="${notice.subject}"></a>
+                <p class="text-sm text-gray-600" th:text="${#temporals.format(notice.createDate, 'yyyy-MM-dd HH:mm')}"></p>
+            </div>
+
+
+
+        </li>
+    </ul>
+    <!-- 페이징처리 시작 -->
+    <div th:if="${!paging.isEmpty()}" class="mt-6">
+        <ul class="flex justify-center space-x-2">
+            <li th:classappend="${!paging.hasPrevious() ? 'opacity-50 cursor-not-allowed' : ''}">
+                <a class="page-link px-3 py-1 border rounded text-sm" href="javascript:void(0)" th:data-page="${paging.number - 1}" th:classappend="${paging.number == 0 ? 'cursor-not-allowed' : ''}">
+                    <span>이전</span>
+                </a>
+            </li>
+            <li th:each="page: ${#numbers.sequence(0, paging.totalPages-1)}"
+                th:if="${page >= paging.number-5 and page <= paging.number+5}"
+                th:classappend="${page == paging.number ? 'bg-blue-500 text-white' : 'bg-white text-blue-500'}">
+                <a class="page-link px-3 py-1 border rounded text-sm" th:text="${page+1}" href="javascript:void(0)" th:data-page="${page}"></a>
+            </li>
+            <li th:classappend="${!paging.hasNext() ? 'opacity-50 cursor-not-allowed' : ''}">
+                <a class="page-link px-3 py-1 border rounded text-sm" href="javascript:void(0)" th:data-page="${paging.number + 1}" th:classappend="${paging.number == paging.totalPages - 1 ? 'cursor-not-allowed' : ''}">
+                    <span>다음</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <form th:action="@{/cscenter/noticelist}" method="get" id="searchForm" class="hidden">
+        <input type="hidden" id="kw" name="kw" th:value="${kw}">
+        <input type="hidden" id="page" name="page" th:value="${paging.number}">
+    </form>
+</div>
+<script layout:fragment="script" type='text/javascript'>
+    document.addEventListener("DOMContentLoaded", function () {
+        const pageElements = document.querySelectorAll(".page-link");
+        pageElements.forEach(element => {
+            element.addEventListener('click', function () {
+                const page = this.getAttribute('data-page');
+                const pageNumber = parseInt(page);
+                if (pageNumber >= 0 && !this.classList.contains('cursor-not-allowed')) {
+                    document.getElementById('page').value = page;
+                    document.getElementById('searchForm').submit();
+                }
+            });
+        });
+
+        const btnSearch = document.getElementById("btn_search");
+        if (btnSearch) {
+            btnSearch.addEventListener('click', function () {
+                document.getElementById('kw').value = document.getElementById('search_kw').value;
+                document.getElementById('page').value = 0;
+                document.getElementById('searchForm').submit();
+            });
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko" layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Homepage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .badge-popular {
+            background-color: #f59e0b; /* Tailwind's yellow-400 */
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        .bg-white:hover {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+<!-- Main content -->
+<div layout:fragment="content" class="flex-1 container mx-auto my-8 p-6 bg-white shadow-md rounded-lg border border-gray-200 space-y-8">
+	
+	<div id="data-container" th:data-my-variable="${contextPath}"></div>
+	
+	
+    <!-- Top Shared Products Section -->
+    <div class="mb-8 p-6 bg-white rounded-lg shadow-lg border border-gray-200">
+        <h2 class="text-3xl font-bold mb-4 text-gray-800 border-b border-gray-300 pb-2">공유를 많이 받은 제품</h2>
+        <!-- Product List -->
+        <ul class="space-y-4">
+            <li th:each="product, iterStat : ${topSharedProducts}" class="card bg-white shadow-md rounded-lg overflow-hidden flex p-3 border border-gray-200 hover:bg-gray-50">
+                <a th:href="${product.link}" class="block flex-shrink-0">
+                    <img th:src="${product.image}" alt="Product Image" class="w-32 h-32 object-cover rounded-lg border border-gray-200">
+                </a>
+                <div class="ml-4 flex-1 flex items-center">
+                    <div class="flex-1">
+                        <div class="text-lg font-semibold mb-2 relative flex items-center">
+            <span
+                    th:class="${iterStat.index == 0 ? 'text-yellow-500' :
+                            (iterStat.index == 1 ? 'text-gray-400' :
+                            (iterStat.index == 2 ? 'text-yellow-700' : 'text-gray-900'))}"
+                    th:text="${iterStat.index + 1} + '위'"></span>
+                            <span
+                                    th:if="${iterStat.index == 0}"
+                                    class="text-yellow-500 text-xl ml-2">
+                <i class="fas fa-star"></i> <!-- 별 아이콘 -->
+            </span>
+                            <span
+                                    th:if="${iterStat.index == 1}"
+                                    class="text-gray-400 text-xl ml-2">
+                <i class="fas fa-star"></i>
+            </span>
+                            <span
+                                    th:if="${iterStat.index == 2}"
+                                    class="text-yellow-700 text-xl ml-2">
+                <i class="fas fa-star"></i>
+            </span>
+                            <a
+                                    th:href="${product.link}"
+                                    target="_blank"
+                                    th:text="${#strings.replace(#strings.replace(#strings.replace(product.title, '<b>', ''), '</b>', ''), '&lt;b&gt;', '')}"
+                                    class="ml-2 truncate hover:text-blue-600 transition-colors duration-300"></a>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-1">공유 수: <span th:text="${product.count}"></span></p>
+                    </div>
+                </div>
+            </li>
+            <!-- No Data Message -->
+            <li th:if="${#lists.isEmpty(topSharedProducts)}" class="text-center text-gray-500 my-28 text-2xl">데이터가 없습니다.</li>
+        </ul>
+    </div>
+
+
+
+
+    <!-- Wishlist Latest Products Section -->
+    <div class="p-6 bg-white rounded-lg shadow-lg border border-gray-200">
+        <h2 class="text-3xl font-bold mb-4 text-gray-800 border-b border-gray-300 pb-2">최근 사람들이 찜한 제품</h2>
+        <div class="flex overflow-x-auto space-x-4 pb-4">
+            <div th:each="product : ${products}" class="card bg-white shadow-md rounded-lg overflow-hidden flex-none w-64 border border-gray-200 transition-transform transform hover:scale-105 hover:shadow-lg">
+                <a th:href="${product.link}" target="_blank" class="block">
+                    <img th:src="${product.image}" alt="Product Image" class="w-full h-60 object-cover rounded-t-lg border-b border-gray-200">
+                </a>
+                <div class="p-4">
+                    <a th:href="${product.link}" th:text="${#strings.replace(#strings.replace(#strings.replace(product.title, '<b>', ''), '</b>', ''), '&lt;b&gt;', '')}" class="block text-base font-semibold text-gray-800 truncate mb-2 hover:text-blue-600 transition-colors duration-300"></a>
+                    <p class="text-sm text-gray-600">Price: <span th:text="${product.lprice}"></span> 원</p>
+                </div>
+            </div>
+			<div th:if="${#lists.isEmpty(products)}" class="text-center text-gray-500 my-28 text-2xl container mx-auto">데이터가 없습니다.</div>
+        </div>
+    </div>
+
+    <!-- Latest Categories and Products Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- 공개된 제품이 있는 공개된 카테고리만 표시 -->
+        <div th:each="category : ${categories}"
+             th:if="${category.state == 'public'} and ${#lists.size(category.products.?[state == 'public']) > 0}"
+             class="card bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200 p-4 transition-transform transform hover:scale-105">
+
+            <!-- 클릭 시 해당 사용자의 위시리스트로 이동하는 링크 -->
+            <a th:href="@{|/wishlist/${category.wishlistId}|}"
+               class="group relative">
+                <h3 class="text-xl font-semibold mb-3 text-gray-700">
+                    <span th:text="${category.username + '님의 위시리스트'}"></span>
+                    <span class="float-right italic text-pink-300" th:text="${category.name}"></span>
+                </h3>
+                <h3 class="text-xl font-semibold mb-3 text-gray-700 absolute inset-0 opacity-0 group-hover:opacity-100 group-hover:text-orange-500 transition-all duration-300"
+                    th:text="${category.username} + '님의 위시리스트로 이동!'"></h3>
+            </a>
+
+            <!-- 공개된 제품 리스트 -->
+            <ul class="list-none p-0">
+                <li th:each="product : ${category.products}" th:if="${product.state == 'public'}"
+                    class="flex items-center bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200 mb-3">
+                    <a th:href="${product.link}" target="_blank" class="block flex items-center p-3">
+                        <img th:src="${product.image}" alt="Product Image" class="w-20 h-20 object-cover rounded-lg border border-gray-200 mr-3">
+                        <div class="flex-1">
+                            <!-- Remove HTML tags and truncate the title -->
+                            <h4 th:text="${#strings.replace(#strings.replace(#strings.replace(product.title, '<b>', ''), '</b>', ''), '&lt;b&gt;', '')}"
+                                class="text-sm font-medium text-gray-800 truncate mb-1 hover:text-blue-600 transition-colors duration-300"></h4>
+                            <p class="text-xs text-gray-600">Price: <span th:text="${product.lprice}"></span> 원</p>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+
+        </div>
+    </div>
+
+
+    <!-- Loading Spinner -->
+<div id="loading" style="display: none;">
+    <div class="loader"></div>
+</div>
+
+<script>
+    // Simulate loading spinner for demonstration
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('loading').style.display = 'none'; // Hide loading spinner after content loads
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Something went wrong</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            color: #333;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            display: inline-block;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: #e74c3c;
+            font-size: 2em;
+        }
+        p {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+        .btn {
+            background-color: #3498db;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+<!-- 에러페이지 -->
+    <div class="container">
+        <h1>에러 발생</h1>
+        <p>상태 코드: <span th:text="${status}"></span></p>
+        <p>에러 메세지: <span th:text="${error}"></span></p>
+        <p><a href="javascript:history.back()" class="btn">Go Back</a></p>
+    </div>
+</body>
+</html>

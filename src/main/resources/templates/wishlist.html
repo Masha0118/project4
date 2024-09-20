@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Wishlist</title>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://developers.kakao.com/sdk/js/kakao.min.js"></script>
+    <script th:src="@{/js/kakaoShare.js}"></script>
+    <script th:src="@{/js/modalFunctions.js}"></script>
+    <script th:src="@{/js/dragAndDrop.js}"></script>
+    <script th:src="@{/js/productFilter.js}"></script>
+    <script th:src="@{/js/wishlistFunctions.js}"></script>
+
+    <style>
+        .category {
+            margin-bottom: 16px;
+            width: 100%;
+        }
+        .horizontal-scroll {
+            display: flex;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 8px; /* 여백 추가 */
+        }
+        .horizontal-scroll .product-item {
+            display: inline-block;
+            vertical-align: top;
+            white-space: normal;
+            width: 200px;
+            height: 350px;
+            margin-right: 16px;
+            box-sizing: border-box;
+            position: relative; /* Ensure the buttons stay within the card */
+        }
+        .product-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .product-item h4 {
+            height: 40px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .product-item span {
+            display: block;
+            height: 20px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .product-item .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: auto;
+            position: absolute;
+            bottom: 16px; /* Ensure the buttons stay within the card */
+            left: 16px;
+            right: 16px;
+        }
+        .product-item .buttons button {
+            width: 100%;
+        }
+        .private-label, .public-label {
+            display: inline-block;
+            padding: 2px 8px;
+            background-color: #e2e8f0;
+            font-weight: bold;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .private-label {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .public-label {
+            background-color: #ff29ba;
+            color: #f6f3f6;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-40%);
+            bottom: 100%;
+            margin-bottom: 8px;
+            min-width: 160px;
+            padding: 8px 0;
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+
+        .dropdown-menu a {
+            display: block;
+            padding: 8px 16px;
+            color: #4a5568;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .dropdown-menu a:hover {
+            background-color: #f7fafc;
+        }
+        .dropdown-button {
+            position: relative;
+        }
+        .dropdown-button button {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dropdown-button button:hover {
+            background-color: #f7fafc;
+        }
+        /* 버튼 공통 스타일 */
+        .btn {
+            width: 100%; /* 모든 버튼의 너비를 동일하게 */
+            max-width: 200px; /* 최대 너비 설정 (원하는 경우 조정 가능) */
+            padding: 12px; /* 패딩을 동일하게 설정 */
+            border-radius: 8px; /* 동일한 라운드 적용 */
+            text-align: center; /* 텍스트 중앙 정렬 */
+        }
+
+        /* 마지막 버튼에만 mb-2 제거 */
+        .btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-body {
+            display: flex;
+            justify-content: space-between; /* 좌우 패널 사이에 공간을 분배 */
+            align-items: center; /* 높이 중앙 정렬 */
+            height: 100%; /* 전체 높이를 사용 */
+        }
+
+    </style>
+    <script>
+        $(document).ready(function() {
+            $('.dropdown-button button').on('click', function(event) {
+                event.stopPropagation();
+                var $dropdownMenu = $(this).parent().find('.dropdown-menu');
+                if ($dropdownMenu.is(':visible')) {
+                    $dropdownMenu.hide();
+                } else {
+                    $('.dropdown-menu').hide();
+                    $dropdownMenu.toggle();
+                }
+            });
+            $(document).on('click', function() {
+                $('.dropdown-menu').hide();
+            });
+        });
+
+        // 모달 닫기
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('closeFriendShareModal').addEventListener('click', function () {
+                const modal = document.getElementById('friendShareModal');
+                modal.classList.add('hidden');
+            });
+        });
+    </script>
+</head>
+<body layout:fragment="content" >
+
+	<div id="data-container" th:data-my-variable="${contextPath}"></div>
+
+<div>
+<input type="text" th:value="${userId}" hidden="hidden" id="userId"> <!-- 사용자 아이디 필드에 id 추가 -->
+<input type="text" th:value="${username}" hidden="hidden" id="username"> <!-- 사용자 이름 필드에 id 추가 -->
+    <input type="text" th:value="${userRealName}" hidden="hidden" id="userRealName">
+<div id="wishlists" class="space-y-4">
+    <div th:each="wishlist : ${wishlists}" th:id="'wishlist-' + ${wishlist.id}" class="border p-4 bg-white rounded-lg shadow category">
+        <h2 class="text-xl font-semibold mb-4" th:utext="${wishlist.name}"></h2> <!-- th:text를 th:utext로 변경 -->
+        <div class="space-y-2" >
+            <input th:if="${isOwner}" type="text" placeholder="카테고리명 입력" class="border p-2 rounded mr-2" />
+            <button class="bg-blue-500 text-white px-4 py-2 rounded" th:attr="onclick='addCategory(' + ${wishlist.id} + ')'" th:if="${isOwner}">카테고리 생성</button>
+            <button class="bg-green-500 text-white px-4 py-2 rounded" onclick="openModal()" th:if="${isOwner}">공유하기</button>
+            <div th:id="'categories-' + ${wishlist.id}" class="mt-4 space-y-4">
+                <div th:each="category : ${categories}" th:id="'category-' + ${category.id}" class="border p-4 rounded-lg bg-gray-50 shadow category" >
+                    <input type="hidden" th:value="${category.id}" th:class="'category-id-' + ${category.id}" /> <!-- 고유한 클래스 할당 -->
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold" th:utext="${category.name}" id="categoryName"></h3> <!-- th:text를 th:utext로 변경 -->
+                        <form id="product_filter" class="max-w-sm mx-auto ml-2">
+                            <select th:if="${isOwner}" th:id="'select_filter-cate-' + ${category.id}" class="bg-gray-50 border border-gray-300
+								 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600
+								  dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    th:attr="onchange='categorySelectFilter(' + ${wishlist.id} + ', ' + ${category.id} + ')'"
+                            >
+                                <option value="all" class="font-medium text-gray-900 dark:text-white" selected >전체</option>
+                                <option value="public" class="font-medium text-gray-900 dark:text-white" >공개</option>
+                                <option value="private" class="font-medium text-gray-900 dark:text-white" th:if="${isOwner}" >비공개</option>
+                            </select>
+                        </form>
+<!--                        <button th:id="'kakaotalk-sharing-btn-' + ${category.id}" class="bg-yellow-400 text-white px-4 py-2 rounded" th:attr="onclick='shareKakaoLinks(' + ${category.id} + ')'" th:if="${isOwner}">카카오톡 공유</button>-->
+
+                        <div th:id="'categoryStateBtnContainer-'+${category.id}" th:if="${isOwner}">
+                            <button th:id="'categoryStateBtn-' + ${category.id}" th:if="'private' == ${category.state}" class="bg-gray-400 text-white px-4 py-2 rounded" th:attr="onclick='changeCategoryState(' + ${category.id} + ')'">비공개</button>
+                            <button th:id="'categoryStateBtn-' + ${category.id}" th:if="'public' == ${category.state}" class="bg-pink-400 text-white px-4 py-2 rounded" th:attr="onclick='changeCategoryState(' + ${category.id} + ')'">공개</button>
+                        </div>
+
+                        <button class="delete-button bg-red-500 text-white px-4 py-2 rounded" th:if="${category.name != '기본 카테고리' and isOwner}" th:attr="onclick='deleteCategory(' + ${wishlist.id} + ',' + ${category.id} + ')'">카테고리 삭제</button>
+                    </div>
+                    <div class="horizontal-scroll" th:id="'products-' + ${category.id}">
+                        <div th:each="product : ${category.products}" class="product-item p-4 border rounded-lg border-gray-300 bg-white shadow flex flex-col" th:id="'product-' + ${product.id}">
+                            <div th:id="'productState-' + ${category.id} + 'cate' + ${product.id}" class="flex justify-end mb-2">
+                                <span class="public-label" th:if="${product.state == 'public'}">공개</span>
+                                <span class="private-label" th:if="${product.state == 'private'}">비공개</span>
+                            </div>
+                            <img th:src="@{${product.image}}" alt="Product Image" class="mb-2 w-full h-40 object-cover rounded" />
+                            <h4 class="text-lg font-semibold mb-1" th:utext="${#strings.abbreviate(product.title, 30)}"></h4>
+                            <input type="hidden" th:value="${product.getLink()}" th:id="'addProductLink-' + ${product.id}">
+                            <span class="text-gray-500 mb-2" th:text="${#numbers.formatInteger(product.lprice, 0, 'COMMA')} + ' 원'"></span>
+
+                            <div th:if="${isOwner}" class="flex justify-end mb-4 relative inline-block text-left mt-2 dropdown-button">
+                                <button th:id="'cardmenu-button' + ${product.id} + 'cate' + ${category.id}" class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" aria-expanded="true" aria-haspopup="true">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12h.01M12 12h.01M18 12h.01"></path>
+                                    </svg>
+                                </button>
+                                <div th:id="'carddropdown-menu' + ${product.id} + 'cate' + ${category.id}" class="dropdown-menu origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                                    <div th:id="'productStatechange-' + ${category.id} + 'cate' + ${product.id}" class="py-1" role="none">
+                                        <a th:if="${product.state} == 'public'" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem" tabindex="-1" th:id="'menu-item-toPrivate' + ${product.id} + 'cate' + ${category.id}" th:attr="onclick='changeState(' + ${category.id} + ', ' + ${product.id} + ')'">비공개로 전환</a>
+                                        <a th:if="${product.state} == 'private'" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem" tabindex="-1" th:id="'menu-item-toPublic' + ${product.id} + 'cate' + ${category.id}" th:attr="onclick='changeState(' + ${category.id} + ', ' + ${product.id} + ')'">공개로 전환</a>
+                                        <a class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem" tabindex="-1" th:attr="onclick='deleteProduct(' + ${product.id} + ')'">삭제</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 공유하기 모달 -->
+        <div id="shareModal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+            <div class="modal-content bg-white p-8 rounded-lg w-full max-w-4xl shadow-lg max-h-full overflow-y-auto">
+                <span class="close text-gray-500 text-2xl cursor-pointer" onclick="closeModal()">&times;</span>
+                <div class="modal-header flex justify-between items-center mb-4">
+                    <h2 id="modalUserId" class="text-xl font-semibold" th:utext="${userRealName} + ' 님의 위시리스트'"></h2>
+                </div>
+
+                <div class="modal-body flex justify-between items-center">
+                    <div class="left-panel flex-1 overflow-y-auto p-4 border-r max-h-96">
+                        <div id="categoryProductList" class="space-y-4"></div>
+                    </div>
+                    <div class="flex flex-col items-center justify-center p-4 max-w-xs">
+                        <button class="btn bg-green-500 text-white mb-2" onclick="generateLink()">링크 생성</button>
+                        <button class="btn bg-blue-500 text-white mb-2" onclick="goToCheckedCategories()">카테고리 공유</button>
+<!--                        <button class="btn bg-yellow-400 text-white mb-2" onclick="shareKakaoLink()">카카오 공유</button>-->
+                        <button class="btn bg-pink-300 text-white" onclick="shareWithFriends()">친구 공유</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 친구 공유 모달 -->
+        <div id="friendShareModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                <h2 class="text-xl font-bold mb-4">친구에게 공유</h2>
+                <div id="friendList" class="mb-4 max-h-64 overflow-y-auto">
+                    <!-- 친구 목록이 여기에 동적으로 추가됩니다 -->
+                </div>
+                <div class="text-right">
+                    <button id="closeFriendShareModal" class="bg-red-500 text-white px-4 py-2 rounded">닫기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 개별 공유 모달 -->
+        <div id="individualShareModal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+            <div class="individual-modal-content bg-white p-8 rounded-lg w-full max-w-md shadow-lg">
+                <span class="close text-gray-500 text-2xl cursor-pointer" onclick="closeIndividualShareModal()">&times;</span>
+                <h2 class="text-xl font-semibold mb-4">개별 공유 링크</h2>
+                <input type="text" id="shareLinkInput" class="border p-2 w-full mb-4 rounded" readonly>
+                <input type="hidden" id="shareLinkImage">
+                <input type="hidden" id="shareLinkTitle">
+                <button class="bg-blue-500 text-white px-4 py-2 rounded mb-2" onclick="copyLink()">링크 복사</button>
+                <button class="bg-yellow-400 text-black px-4 py-2 rounded kakao-share-button" onclick="shareKakaoLinks()">카카오톡 공유</button>
+            </div>
+        </div>
+
+        <!-- 카테고리 공유 모달 -->
+        <div id="checkedCategoriesShareModal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+            <div class="checked-categories-modal-content bg-white p-8 rounded-lg w-full max-w-md shadow-lg">
+                <span class="close text-gray-500 text-2xl cursor-pointer" onclick="closeCheckedCategoriesShareModal()">&times;</span>
+                <h2 class="text-xl font-semibold mb-4">카테고리별 공유 링크</h2>
+                <input type="text" id="checkedCategoriesShareLinkInput" class="border p-2 w-full mb-4 rounded" readonly>
+                <input type="hidden" id="checkedCategoriesShareImage">
+                <input type="hidden" id="checkedCategoriesShareTitle">
+                <input type="hidden" id="checkedCategoriesShareLink">
+                <button class="bg-blue-500 text-white px-4 py-2 rounded mb-2" onclick="copyCheckedCategoriesLink()">링크 복사</button>
+<!--                <button class="bg-yellow-400 text-black px-4 py-2 rounded kakao-share-button" onclick="shareKakaoLink()">카카오톡 공유</button>-->
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

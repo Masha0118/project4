@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko" layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입</title>
+    <script>
+        const autoHyphen = (target) => {
+            target.value = target.value
+                .replace(/[^0-9]/g, '')
+                .replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3").replace(/(\-{1,2})$/g, "");
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+			let dataContainer = document.getElementById('data-container');
+			let contextPath = dataContainer.getAttribute('data-my-variable');
+			contextPath = contextPath === null ? "" : contextPath;
+
+            // 주민등록번호 앞자리 입력 후 자동으로 뒷자리로 포커스 이동
+            const rrnFrontInput = document.getElementById('rrnFront-input');
+            const rrnBackInput = document.getElementById('rrnBack-input');
+            const rrnError = document.getElementById('rrn-error'); // 오류 메시지 표시 요소
+			
+
+
+            if (rrnFrontInput && rrnBackInput) {
+                rrnFrontInput.addEventListener('input', function() {
+                    if (rrnFrontInput.value.length === 6) {
+                        rrnBackInput.focus();
+                    }
+                });
+
+                // 유효성 검사 함수
+                const validateRrn = () => {
+                    const rrnFront = rrnFrontInput.value;
+                    const rrnBack = rrnBackInput.value;
+
+                    if (rrnFront.length !== 6 || rrnBack.length !== 7) {
+                        rrnError.textContent = '유효한 주민등록번호를 입력하세요.';
+                        return false;
+                    } else {
+                        rrnError.textContent = '';
+                        return true;
+                    }
+                };
+
+                rrnFrontInput.addEventListener('blur', validateRrn);
+                rrnBackInput.addEventListener('blur', validateRrn);
+            }
+            // 중복 확인 버튼 초기화
+            const checkUsernameBtn = document.getElementById('check-username-btn');
+            if (checkUsernameBtn) {
+                console.log('중복 확인 버튼이 바인딩되었습니다.');
+                checkUsernameBtn.addEventListener('click', function() {
+                    const username = document.getElementById('username-input').value;
+                    const usernameError = document.getElementById('username-error');
+
+                    // 중복 확인 로직은 유효성 검사와 별도로 실행
+                    if (username.length < 3 || username.length > 25) {
+                        if (usernameError) {
+                            usernameError.textContent = '아이디는 3자 이상, 25자 이하여야 합니다.';
+                        }
+                        return;
+                    } else {
+                        if (usernameError) {
+                            usernameError.textContent = '';
+                        }
+                    }
+
+                    fetch(`${contextPath}/user/check-username?username=${encodeURIComponent(username)}`)
+                        .then(response => response.json())
+                        .then(isAvailable => {
+                            if (isAvailable) {
+                                alert('사용 가능한 아이디입니다.');
+                            } else {
+                                alert('이미 사용 중인 아이디입니다.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('아이디 중복 확인 중 오류가 발생했습니다.');
+                        });
+                });
+            } else {
+                console.error('중복 확인 버튼을 찾을 수 없습니다.');
+            }
+
+            // 기타 필드 유효성 검사 초기화
+            const fields = [
+                { inputId: 'username-input', errorId: 'username-error', validation: value => value.length >= 3 && value.length <= 25, errorMessage: '아이디는 3자 이상, 25자 이하여야 합니다.' },
+                { inputId: 'password1-input', errorId: 'password1-error', validation: value => value.length > 0, errorMessage: '비밀번호는 필수항목입니다.' },
+                { inputId: 'password2-input', errorId: 'password2-error', validation: value => value.length > 0, errorMessage: '비밀번호 확인은 필수항목입니다.' },
+                { inputId: 'name-input', errorId: 'name-error', validation: value => value.length > 0, errorMessage: '이름은 필수항목입니다.' },
+                { inputId: 'tel-input', errorId: 'tel-error', validation: value => value.length > 0, errorMessage: '전화번호는 필수항목입니다.' },
+                { inputId: 'email-input', errorId: 'email-error', validation: value => value.length > 0, errorMessage: '이메일은 필수항목입니다.' }
+            ];
+
+            fields.forEach(field => {
+                const inputElement = document.getElementById(field.inputId);
+                const errorElement = document.getElementById(field.errorId);
+
+                if (inputElement && errorElement) {
+                    inputElement.addEventListener('focus', function() {
+                        errorElement.textContent = '';
+                    });
+
+                    inputElement.addEventListener('blur', function() {
+                        if (!field.validation(inputElement.value)) {
+                            errorElement.textContent = field.errorMessage;
+                        } else {
+                            errorElement.textContent = '';
+                        }
+                    });
+                }
+            });
+
+            // 주소 찾기 기능 초기화
+            const findAddressBtn = document.getElementById('find-address-btn');
+            if (findAddressBtn) {
+                findAddressBtn.addEventListener('click', function() {
+                    new daum.Postcode({
+                        oncomplete: function(data) {
+                            document.getElementById('zipcode').value = data.zonecode;
+                            document.getElementById('address').value = data.roadAddress;
+                            document.getElementById('addressDetail').focus();
+                        }
+                    }).open();
+                });
+            }
+        });
+
+    </script>
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+<div layout:fragment="content" class="container mx-auto my-10">
+	
+	<div id="data-container" th:data-my-variable="${contextPath}"></div>
+	
+    <div class="my-6 border-b-2 border-gray-300 pb-3">
+        <h4 class="text-2xl font-semibold text-gray-800">회원가입</h4>
+    </div>
+    <form th:object="${userCreateForm}" th:action="@{/user/signup}" method="post" class="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+
+        <!-- 사용자 ID 입력 + 중복 확인 버튼 -->
+        <div class="mb-6">
+            <label for="username" class="block text-gray-700 text-sm font-bold mb-2">
+                아이디 <span class="text-red-500">*</span>
+                <span id="username-error" class="text-red-500 text-sm"></span> <!-- 빈 span 요소 추가 -->
+            </label>
+            <div class="flex">
+                <input type="text" id="username-input" th:field="*{username}" placeholder="사용자 ID 입력" class="shadow appearance-none border rounded-l w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="button" id="check-username-btn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-r focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap">
+                    중복 확인
+                </button>
+            </div>
+        </div>
+
+        <!-- 비밀번호 입력 -->
+        <div class="mb-6">
+            <label for="password1" class="block text-gray-700 text-sm font-bold mb-2">
+                비밀번호 <span class="text-red-500">*</span>
+                <span id="password1-error" th:if="${#fields.hasErrors('password1')}" th:errors="*{password1}" class="text-red-500 text-sm"></span>
+            </label>
+            <input type="password" id="password1-input" th:field="*{password1}" placeholder="비밀번호 입력" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <!-- 비밀번호 확인 -->
+        <div class="mb-6">
+            <label for="password2" class="block text-gray-700 text-sm font-bold mb-2">
+                비밀번호 확인 <span class="text-red-500">*</span>
+                <span id="password2-error" th:if="${#fields.hasErrors('password2')}" th:errors="*{password2}" class="text-red-500 text-sm"></span>
+            </label>
+            <input type="password" id="password2-input" th:field="*{password2}" placeholder="비밀번호 확인" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <!-- 비밀번호 분실 질문 -->
+        <div class="mb-6">
+            <label for="security-question" class="block text-gray-700 text-sm font-bold mb-2">
+                비밀번호 분실 질문 <span class="text-red-500">*</span>
+                <span id="security-question-error" th:if="${#fields.hasErrors('securityQuestion')}" th:errors="*{securityQuestion}" class="text-red-500 text-sm"></span>
+            </label>
+            <select id="security-question" th:field="*{securityQuestion}" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">질문을 선택하세요</option>
+                <option value="어머니의 성함은?">어머니의 성함은?</option>
+                <option value="어렸을 때 다닌 초등학교 이름은?">어렸을 때 다닌 초등학교 이름은?</option>
+                <option value="가장 친한 친구의 이름은?">가장 친한 친구의 이름은?</option>
+                <option value="첫 번째 애완동물의 이름은?">첫 번째 애완동물의 이름은?</option>
+                <option value="태어난 도시 이름은?">태어난 도시 이름은?</option>
+                <option value="가장 좋아하는 선생님의 이름은?">가장 좋아하는 선생님의 이름은?</option>
+                <option value="첫 차의 모델명은?">첫 차의 모델명은?</option>
+                <option value="가장 좋아하는 음식은?">가장 좋아하는 음식은?</option>
+                <option value="첫 직장의 이름은?">첫 직장의 이름은?</option>
+                <option value="어렸을 때의 별명은?">어렸을 때의 별명은?</option>
+                <option value="가장 좋아하는 책의 제목은?">가장 좋아하는 책의 제목은?</option>
+                <option value="첫사랑의 이름은?">첫사랑의 이름은?</option>
+                <option value="가장 좋아하는 영화 제목은?">가장 좋아하는 영화 제목은?</option>
+                <option value="어린 시절 꿈꾸던 직업은?">어린 시절 꿈꾸던 직업은?</option>
+                <option value="결혼식을 올린 도시 이름은?">결혼식을 올린 도시 이름은?</option>
+                <option value="신혼여행지 이름은?">신혼여행지 이름은?</option>
+                <option value="가장 좋아하는 스포츠는?">가장 좋아하는 스포츠는?</option>
+                <option value="가장 좋아하는 가수 또는 밴드는?">가장 좋아하는 가수 또는 밴드는?</option>
+                <option value="어렸을 때 살았던 거리 이름은?">어렸을 때 살았던 거리 이름은?</option>
+            </select>
+        </div>
+
+        <!-- 비밀번호 분실 답변 -->
+        <div class="mb-6">
+            <label for="security-answer" class="block text-gray-700 text-sm font-bold mb-2">
+                비밀번호 분실 답변 <span class="text-red-500">*</span>
+                <span id="security-answer-error" th:if="${#fields.hasErrors('securityAnswer')}" th:errors="*{securityAnswer}" class="text-red-500 text-sm"></span>
+            </label>
+            <input type="text" id="security-answer" th:field="*{securityAnswer}" placeholder="질문에 대한 답변을 입력하세요" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <!-- 이름 입력 -->
+        <div class="mb-6">
+            <label for="name" class="block text-gray-700 text-sm font-bold mb-2">
+                이름 <span class="text-red-500">*</span>
+                <span id="name-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-red-500 text-sm"></span>
+            </label>
+            <input type="text" id="name-input" th:field="*{name}" placeholder="이름을 입력하세요" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <!-- 주민등록번호 입력 -->
+        <div class="mb-6">
+            <label for="rrnFront" class="block text-gray-700 text-sm font-bold mb-2">
+                주민등록번호 <span class="text-red-500">*</span>
+            </label>
+            <div class="flex space-x-3">
+                <input type="text" id="rrnFront-input" th:field="*{rrnFront}" placeholder="앞자리 (6자리)" maxlength="6" class="shadow appearance-none border rounded w-1/2 py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="password" id="rrnBack-input" th:field="*{rrnBack}" placeholder="뒷자리 (7자리)" maxlength="7" class="shadow appearance-none border rounded w-1/2 py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <span id="rrn-error" class="text-red-500 text-sm mt-2"></span>
+        </div>
+
+        <!-- 전화번호 입력 -->
+        <div class="mb-6">
+            <label for="tel" class="block text-gray-700 text-sm font-bold mb-2">
+                전화번호 <span class="text-red-500">*</span>
+                <span id="tel-error" th:if="${#fields.hasErrors('tel')}" th:errors="*{tel}" class="text-red-500 text-sm"></span>
+            </label>
+            <input
+                    onfocus="this.placeholder=''"
+                    maxlength="13"
+                    oninput="autoHyphen(this)"
+                    pattern="010-[0-9]{3,4}-[0-9]{4}"
+                    placeholder="휴대폰 번호"
+                    id="tel-input"
+                    th:field="*{tel}"
+                    class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+        </div>
+
+        <!-- 이메일 입력 -->
+        <div class="mb-6">
+            <label for="email" class="block text-gray-700 text-sm font-bold mb-2">
+                이메일 <span class="text-red-500">*</span>
+                <span id="email-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-red-500 text-sm"></span>
+            </label>
+            <input type="email" id="email-input" th:field="*{email}" placeholder="이메일 입력" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <!-- 주소 입력 -->
+        <div class="mb-6">
+            <label for="address" class="block text-gray-700 text-sm font-bold mb-2">
+                주소 (선택사항)
+            </label>
+            <div class="flex mb-3">
+                <input type="text" id="zipcode" th:field="*{zipcode}" placeholder="우편번호" class="shadow appearance-none border rounded-l w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="button" id="find-address-btn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-r focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap">
+                    주소 찾기
+                </button>
+            </div>
+            <input type="text" id="address" th:field="*{address}" placeholder="주소" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3">
+            <input type="text" id="addressDetail" th:field="*{addressDetail}" placeholder="상세 주소" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <!-- 가입 버튼 -->
+        <div class="text-center">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                회원가입
+            </button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

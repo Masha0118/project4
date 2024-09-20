@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html layout:decorate="~{adminPage/layout_ad}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>질문 목록</title>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+
+			var contextPath = /*[[${contextPath}]]*/
+			console.log(contextPath);
+
+            window.deleteHistory = function(id) {
+                if (confirm("정말 삭제하시겠습니까?")) {
+
+
+                    fetch(`${contextPath}/cscenter/myhistory/delete/${id}`, {
+
+
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(response => {
+                        if (response.ok) {
+                            location.reload(); // 페이지 새로고침하여 목록 갱신
+                        } else {
+                            alert('삭제에 실패하였습니다.');
+                        }
+                    }).catch(error => {
+                        console.error('Error:', error);
+                        alert('삭제 중 오류가 발생하였습니다.');
+                    });
+                }
+            }
+
+            window.setSecret = function(id, isSecret) {
+
+                fetch(`${contextPath}/cscenter/myhistory/setsecret/${id}`, {
+
+
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ secret: isSecret })
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload(); // 페이지 새로고침하여 목록 갱신
+                    } else {
+                        alert('비공개 설정에 실패하였습니다.');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    alert('비공개 설정 중 오류가 발생하였습니다.');
+                });
+            }
+        });
+        /*]]>*/
+    </script>
+</head>
+<body class="bg-light">
+<div layout:fragment="content_ad" class="container my-4">
+    <h2 class="my-4">상담 내역 관리</h2>
+    <main class="p-4">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover bg-white shadow-sm rounded-lg">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">상태</th>
+                    <th scope="col">제목</th>
+                    <th scope="col">내용</th>
+                    <th scope="col">작성자</th>
+                    <th scope="col">등록 날짜</th>
+                    <th scope="col">Link</th>
+                    <th scope="col">비공개</th>
+                    <th scope="col">삭제</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- 서버에서 전달된 질문 리스트를 반복하여 표시합니다 -->
+                <tr th:each="history : ${allHistories}" class="text-dark">
+                    <td th:text="${history.id}"></td>
+                    <td th:text="${#lists.isEmpty(history.answerList) ? '미답변' : '종료된 상담'}" th:classappend="${#lists.isEmpty(history.answerList) ? 'text-danger' : 'text-success'}"></td>
+                    <td th:utext="${history.subject}"></td>
+                    <td th:utext="${history.content}"></td>
+                    <td th:utext="${history.author.username}"></td>
+                    <td th:text="${#temporals.format(history.createDate, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td>
+                        <a th:if="${#lists.isEmpty(history.answerList)}" th:href="@{/cscenter/myhistory/detail/{id}(id=${history.id})}" target="_blank" class="btn btn-success">답변하기</a>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-primary"
+                                th:onclick="'setSecret(' + ${history.id} + ', ' + !${history.secret} + ')'">
+                            <span th:text="${history.secret} ? '비공개 해제' : '비공개 설정'"></span>
+                        </button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-danger"
+                                th:onclick="'deleteHistory(' + ${history.id} + ')'">삭제</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${page == 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/cscenter/historylist(page=${page-1})}" tabindex="-1">Previous</a>
+                    </li>
+
+                    <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}" th:classappend="${i == page} ? 'active'">
+                        <a class="page-link" th:href="@{/admin/cscenter/historylist(page=${i})}" th:text="${i}"></a>
+                    </li>
+
+                    <li class="page-item" th:classappend="${page == totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/cscenter/historylist(page=${page+1})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+
+        </div>
+    </main>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

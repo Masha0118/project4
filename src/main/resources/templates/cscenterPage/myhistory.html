@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" crossorigin="anonymous"></script>
+    <title>공지사항</title>
+</head>
+<body>
+<div layout:fragment="content" class="container mx-auto my-8">
+    <div class="flex">
+        <div class="text-gray-600 text-[80%] ml-12 font-semibold mb-4">현재 위치: 상담센터 > 상담 내역</div>
+    </div>
+    <div class="flex justify-between my-6">
+        <div>
+            <a th:href="@{/cscenter/regcs}" class="bg-blue-500 text-white px-4 py-2 rounded">질문 등록하기</a>
+        </div>
+        <div class="flex">
+            <input type="text" id="search_kw" class="form-input rounded-l border-r-2" th:value="${kw}" placeholder="검색어 입력">
+            <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded-r" type="button" id="btn_search">찾기</button>
+        </div>
+    </div>
+    <table class="w-full table-auto">
+        <thead class="bg-gray-800 text-white">
+        <tr class="text-center">
+            <th class="py-2">번호</th>
+            <th class="py-2" style="width:50%">제목</th>
+            <th class="py-2">글쓴이</th>
+            <th class="py-2">작성일시</th>
+            <th class="py-2">조회수</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- 데이터가 있는 경우 -->
+        <tr th:each="history, loop : ${paging}" class="text-center border-b">
+            <td class="py-2" th:text="${paging.getTotalElements() - (paging.number * paging.size) - loop.index}"></td>
+            <td class="py-2 text-left">
+                <a th:href="@{|/cscenter/myhistory/detail/${history.id}|}"
+                   th:text="${history.secret ? '비밀글 입니다.' : history.subject}"
+                   th:classappend="${history.secret ? 'text-gray-400' : 'text-blue-500 hover:underline'}"
+                   class="hover:underline"></a>
+                <i class="fas fa-lock text-gray-400 ml-2" th:if="${history.secret}"></i>
+                <span class="text-red-500 text-sm ml-2" th:if="${#lists.size(history.answerList) > 0}"
+                      th:text="${#lists.size(history.answerList)}"></span>
+            </td>
+            <td class="py-2" th:text="${history.author != null ? history.author.username : ''}"></td>
+            <td class="py-2" th:text="${#temporals.format(history.createDate, 'yyyy-MM-dd HH:mm')}"></td>
+            <td class="py-2" th:text="${history.view}"></td>
+        </tr>
+        <!-- 데이터가 없는 경우 -->
+        <tr th:unless="${#lists.size(paging) > 0}">
+            <td colspan="5" class="py-4 text-center text-gray-600">데이터가 없습니다.</td>
+        </tr>
+        </tbody>
+    </table>
+    <!-- 페이징처리 시작 -->
+    <div th:if="${!paging.isEmpty()}" class="mt-6">
+        <ul class="flex justify-center space-x-2">
+            <li th:classappend="${!paging.hasPrevious() ? 'opacity-50 cursor-not-allowed' : ''}">
+                <a class="page-link px-3 py-1 border rounded" href="javascript:void(0)" th:data-page="${paging.number - 1}" th:classappend="${paging.number == 0 ? 'cursor-not-allowed' : ''}">
+                    <span>이전</span>
+                </a>
+            </li>
+            <li th:each="page: ${#numbers.sequence(0, paging.totalPages-1)}"
+                th:if="${page >= paging.number-5 and page <= paging.number+5}"
+                th:classappend="${page == paging.number ? 'bg-blue-500 text-white' : 'bg-white text-blue-500'}">
+                <a class="page-link px-3 py-1 border rounded" th:text="${page+1}" href="javascript:void(0)" th:data-page="${page}"></a>
+            </li>
+            <li th:classappend="${!paging.hasNext() ? 'opacity-50 cursor-not-allowed' : ''}">
+                <a class="page-link px-3 py-1 border rounded" href="javascript:void(0)" th:data-page="${paging.number + 1}" th:classappend="${paging.number == paging.totalPages - 1 ? 'cursor-not-allowed' : ''}">
+                    <span>다음</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <form th:action="@{/cscenter/myhistory}" method="get" id="searchForm" class="hidden">
+        <input type="hidden" id="kw" name="kw" th:value="${kw}">
+        <input type="hidden" id="page" name="page" th:value="${paging.number}">
+    </form>
+</div>
+<script layout:fragment="script" type='text/javascript'>
+    document.addEventListener("DOMContentLoaded", function () {
+        const pageElements = document.querySelectorAll(".page-link");
+        pageElements.forEach(element => {
+            element.addEventListener('click', function () {
+                const page = this.getAttribute('data-page');
+                const pageNumber = parseInt(page);
+                if (pageNumber >= 0 && !this.classList.contains('cursor-not-allowed')) {
+                    document.getElementById('page').value = page;
+                    document.getElementById('searchForm').submit();
+                }
+            });
+        });
+
+        const btnSearch = document.getElementById("btn_search");
+        if (btnSearch) {
+            btnSearch.addEventListener('click', function () {
+                document.getElementById('kw').value = document.getElementById('search_kw').value;
+                document.getElementById('page').value = 0;
+                document.getElementById('searchForm').submit();
+            });
+        }
+    });
+</script>
+</body>
+</html>

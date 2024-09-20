@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Verify Email</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+
+    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-lg">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">인증 링크 이메일이 발송되었습니다.</h1>
+        <h2 class="text-lg text-gray-600 mb-6">이메일을 확인해 링크를 클릭하여 인증을 진행해주세요</h2>
+        
+        <a th:href="@{/user/login}" class="inline-block px-6 py-3 text-white bg-blue-500 hover:bg-blue-600 rounded-lg font-medium text-sm transition duration-300">로그인 페이지로 이동</a>
+    </div>
+
+</body>
+</html>

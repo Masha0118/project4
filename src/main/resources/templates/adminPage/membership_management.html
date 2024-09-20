@@ -1,0 +1,156 @@
+<!doctype html>
+
+<html lang="ko" layout:decorate="~{adminPage/layout_ad}">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Membership Management</title>
+</head>
+<body>
+<div layout:fragment="content_ad" class="container mt-4">
+    <h1>Membership Management</h1>
+    <div id="userCount" th:text="'총 회원수 :' + ${userCount} + '명'"></div>
+
+	<div id="data-container" th:data-my-variable="${contextPath}"></div>
+
+    <h2 class="mt-4">날짜별 회원 가입 통계</h2>
+    <button id="weeklyStatsBtn" class="btn btn-primary">주 단위 보기</button>
+    <button id="monthlyStatsBtn" class="btn btn-secondary">달 단위 보기</button>
+    <canvas id="signupStatsChart"></canvas>
+
+    <h2 class="mt-4">회원 목록</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Username</th>
+            <th scope="col">Email</th>
+            <th scope="col">Signup Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="0 == ${users.size()}">
+            <th>조회 가능한 데이터가 없습니다.</th>
+        </tr>
+        <tr th:if="0 != ${users.size()}" th:each="user : ${users}">
+            <th scope="row" th:text="${user.id}"></th>
+            <td th:text="${user.username}"></td>
+            <td th:text="${user.email}"></td>
+            <td th:text="${user.signupDate}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<th:block layout:fragment="script">
+    <!-- Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Chart.js script -->
+    <script>
+        let chart = null;
+		let dataContainer = document.getElementById('data-container');
+		let contextPath = dataContainer.getAttribute('data-my-variable');
+		contextPath = contextPath === null ? "" : contextPath;
+
+        const updateChart = (labels, data) => {
+            const ctx = document.getElementById('signupStatsChart').getContext('2d');
+            if (chart) {
+                chart.destroy();
+            }
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels, // X축 레이블
+                    datasets: [{
+                        label: '가입자 수',
+                        data: data, // Y축 데이터
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            },
+                            title: {
+                                display: true,
+                                text: '가입자 수'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '날짜'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        };
+
+        const fetchWeeklyStats = () => {
+            fetch(`${contextPath}/admin/usermanagement/inquiry/data?period=weekly`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(response => {
+                    console.log('Weekly Stats:', response);
+                    const daysOfWeek = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+                    const data = daysOfWeek.map(day => response[day] || 0);
+                    updateChart(daysOfWeek, data);
+                })
+                .catch(error => {
+                    console.error('Weekly stats request failed:', error);
+                });
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            fetchWeeklyStats();
+
+            document.getElementById('weeklyStatsBtn').addEventListener('click', fetchWeeklyStats);
+
+            document.getElementById('monthlyStatsBtn').addEventListener('click', function() {
+                fetch(`${contextPath}/admin/usermanagement/inquiry/data?period=monthly`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(response => {
+                        console.log('Monthly Stats:', response);
+                        const daysOfMonth = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+                        const data = daysOfMonth.map(day => response[day] || 0);
+                        updateChart(daysOfMonth, data);
+                    })
+                    .catch(error => {
+                        console.error('Monthly stats request failed:', error);
+                    });
+            });
+        });
+    </script>
+</th:block>
+</body>
+</html>

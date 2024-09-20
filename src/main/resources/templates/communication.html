@@ -1,0 +1,108 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>WebSocket Chat</title>-->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.4.0/sockjs.min.js"></script>-->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>-->
+<!--    <script src="https://cdn.tailwindcss.com"></script>-->
+<!--</head>-->
+<!--<body class="bg-gray-100">-->
+
+<!--&lt;!&ndash; Chat Launcher &ndash;&gt;-->
+<!--<div id="chatLauncher" class="fixed bottom-4 right-4 z-50">-->
+<!--    <button id="openChat" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg">-->
+<!--        OOO님과 대화-->
+<!--    </button>-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Chat Box &ndash;&gt;-->
+<!--<div id="chatBox" class="fixed bottom-4 right-4 w-80 bg-white border border-gray-300 rounded-lg shadow-lg hidden flex flex-col">-->
+<!--    <div class="bg-blue-600 text-white p-3 rounded-t-lg flex justify-between items-center">-->
+<!--        <span>채팅</span>-->
+<!--        <button id="closeChat" class="text-white text-lg font-bold">X</button>-->
+<!--    </div>-->
+<!--    <div id="chatMessages" class="flex-1 p-3 overflow-y-auto max-h-60 border-t border-gray-300"></div>-->
+<!--    <div class="flex items-center border-t border-gray-300 p-3">-->
+<!--        <input id="chatInput" type="text" placeholder="메시지를 입력하세요..." class="flex-1 p-2 border rounded-lg mr-2" />-->
+<!--        <button id="sendChat" class="bg-blue-600 text-white px-4 py-2 rounded-lg">보내기</button>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<script>-->
+<!--    let stompClient = null;-->
+<!--    const myId = document.getElementById('hiddenIdValue').value;-->
+
+<!--    function connect() {-->
+<!--        const socket = new SockJS('/ws');-->
+<!--        stompClient = Stomp.over(socket);-->
+
+<!--        stompClient.connect({}, (frame) => {-->
+<!--            console.log('Connected: ' + frame);-->
+
+<!--            stompClient.subscribe('/user/queue/messages', (messageOutput) => {-->
+<!--                showMessage(JSON.parse(messageOutput.body));-->
+<!--            });-->
+<!--        });-->
+<!--    }-->
+
+<!--    function sendMessage(recipientId) {-->
+<!--        const messageContent = document.getElementById('chatInput').value.trim();-->
+
+<!--        if (messageContent && stompClient) {-->
+<!--            const chatMessage = {-->
+<!--                sender: myId,-->
+<!--                recipient: recipientId,-->
+<!--                content: messageContent-->
+<!--            };-->
+
+<!--            stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));-->
+<!--            document.getElementById('chatInput').value = '';-->
+<!--        }-->
+<!--    }-->
+
+<!--    function showMessage(message) {-->
+<!--        const chatMessages = document.getElementById('chatMessages');-->
+<!--        const messageElement = document.createElement('div');-->
+<!--        messageElement.className = 'message p-2 bg-gray-200 rounded-lg mb-2';-->
+<!--        messageElement.textContent = `${message.sender}: ${message.content}`;-->
+<!--        chatMessages.appendChild(messageElement);-->
+<!--        chatMessages.scrollTop = chatMessages.scrollHeight;-->
+<!--    }-->
+
+<!--    document.addEventListener('DOMContentLoaded', () => {-->
+<!--        connect();-->
+
+<!--        // 대화 시작 버튼 클릭 시-->
+<!--        document.querySelectorAll('.start-chat-btn').forEach(button => {-->
+<!--            button.addEventListener('click', function() {-->
+<!--                const recipientId = button.getAttribute('data-friend-id');-->
+
+<!--                // 기존 채팅창이 열려있는 경우 초기화-->
+<!--                document.getElementById('chatMessages').innerHTML = '';-->
+<!--                document.getElementById('chatBox').classList.remove('hidden');-->
+<!--                document.getElementById('chatLauncher').classList.add('hidden');-->
+
+<!--                // 보내기 버튼 클릭 시 해당 상대방에게 메시지 전송-->
+<!--                const sendChatButton = document.getElementById('sendChat');-->
+<!--                sendChatButton.onclick = () => sendMessage(recipientId);-->
+
+<!--                // Enter 키로 메시지 전송-->
+<!--                document.getElementById('chatInput').onkeypress = (e) => {-->
+<!--                    if (e.key === 'Enter') {-->
+<!--                        sendMessage(recipientId);-->
+<!--                    }-->
+<!--                };-->
+<!--            });-->
+<!--        });-->
+
+<!--        // 채팅창 닫기 버튼 이벤트-->
+<!--        document.getElementById('closeChat').addEventListener('click', () => {-->
+<!--            document.getElementById('chatBox').classList.add('hidden');-->
+<!--            document.getElementById('chatLauncher').classList.remove('hidden');-->
+<!--        });-->
+<!--    });-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->

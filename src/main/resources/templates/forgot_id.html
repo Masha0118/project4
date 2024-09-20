@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}">
+<head>
+  <meta charset="UTF-8">
+  <title>아이디 찾기</title>
+  <script>
+	const autoHyphen = (target) => {
+	    target.value = target.value
+	        .replace(/[^0-9]/g, '')
+	        .replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3").replace(/(\-{1,2})$/g, "");
+	};
+
+  </script>
+</head>
+<body>
+<div layout:fragment="content" class="flex items-start justify-center min-h-screen pt-24 mt-10">
+  <form id="find-id-form" th:action="@{/user/forgotIdProc}" method="post" class="max-w-2xl w-full bg-white p-12 rounded-lg shadow-lg">
+    <h2 class="text-2xl font-bold mb-8 text-gray-700 text-center">아이디 찾기</h2>
+
+    <!-- 이름 입력 -->
+    <div class="mb-4">
+      <label for="name" class="block text-gray-700 text-sm font-bold mb-4">이름 <span class="text-red-500">*</span></label>
+      <input type="text" name="name" id="name" class="shadow appearance-none border rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-sm" required>
+    </div>
+
+    <!-- 주민등록번호 입력 -->
+    <div class="mb-4">
+      <label for="ssn-front" class="block text-gray-700 text-sm font-bold mb-4">주민등록번호 <span class="text-red-500">*</span></label>
+      <div class="flex space-x-4">
+        <input type="text" name="ssnFront" id="ssn-front" maxlength="6" class="shadow appearance-none border rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-sm" placeholder="앞자리 (6자리)" required>
+        <input type="password" name="ssnBack" id="ssn-back" maxlength="7" class="shadow appearance-none border rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-sm" placeholder="뒷자리 (7자리)" required>
+      </div>
+    </div>
+
+    <!-- 전화번호 입력 -->
+    <div class="mb-4">
+      <label for="tel" class="block text-gray-700 text-sm font-bold mb-4">전화번호 <span class="text-red-500">*</span></label>
+
+      <input type="text" onfocus="this.placeholder=''" name="tel" maxlength="13" oninput="autoHyphen(this)" pattern="010-[0-9]{3,4}-[0-9]{4}" id="tel" class="shadow appearance-none border rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-sm" placeholder="전화번호 (숫자만 입력)" required>
+
+    </div>
+
+
+    <!-- 제출 버튼 -->
+    <div class="flex items-center justify-between">
+      <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg focus:outline-none focus:shadow-outline text-sm">아이디 찾기</button>
+    </div>
+
+    <!-- 에러 메시지 출력 -->
+    <div th:if="${errorMessage}" class="mt-6 text-center text-red-500">
+      <p th:text="${errorMessage}"></p>
+    </div>
+
+    <!-- 아이디 출력 -->
+    <div th:if="${username}" class="mt-6 text-center text-green-500">
+      <p>회원님의 아이디는 <span th:text="${username}"></span> 입니다.</p>
+    </div>
+  </form>
+</div>
+<script>
+  document.getElementById('find-id-form').addEventListener('submit', function(event) {
+    event.preventDefault(); // 폼의 기본 제출 동작을 막음
+
+    // 입력된 값 가져오기
+    let name = document.getElementById('name').value;
+    let ssnFront = document.getElementById('ssn-front').value;
+    let ssnBack = document.getElementById('ssn-back').value;
+    let tel = document.getElementById('tel').value;
+
+    // 서버에 데이터를 전송
+    fetch('/user/forgotIdProc', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `name=${encodeURIComponent(name)}&ssnFront=${encodeURIComponent(ssnFront)}&ssnBack=${encodeURIComponent(ssnBack)}&tel=${encodeURIComponent(tel)}`
+    })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('네트워크 응답에 문제가 있습니다.');
+              }
+              return response.text();
+            })
+            .then(result => {
+              let resultMessage = document.getElementById('result-message');
+              if (result.startsWith('일치하는 사용자 정보를 찾을 수 없습니다.')) {
+                resultMessage.textContent = '일치하는 사용자 정보를 찾을 수 없습니다.';
+                resultMessage.style.color = 'red';
+              } else {
+                resultMessage.textContent = `회원님의 아이디는 ${result} 입니다.`;
+                resultMessage.style.color = 'green';
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              document.getElementById('result-message').textContent = '오류가 발생했습니다. 다시 시도하세요.';
+              document.getElementById('result-message').style.color = 'red';
+            });
+  });
+</script>
+
+
+</body>
+</html>

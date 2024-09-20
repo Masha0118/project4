@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공지사항 수정</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 h-screen flex items-center justify-center">
+<div class="relative bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl overflow-hidden">
+    <!-- 배경 패턴 -->
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-100 to-transparent opacity-30"></div>
+
+    <!-- 제목 -->
+    <h2 class="text-4xl font-extrabold text-gray-900 mb-8 relative z-10 text-center">공지사항 수정</h2>
+
+    <form method="post" th:object="${noticeForm}" class="relative z-10 space-y-6">
+        <!-- CSRF 토큰 추가 -->
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <!-- 에러 메시지 -->
+        <div th:replace="~{form_errors :: formErrorsFragment}" class="mb-4"></div>
+
+        <!-- 제목 입력 -->
+        <div class="mb-6">
+            <label for="subject" class="block text-gray-800 text-lg font-semibold mb-2">글 제목</label>
+            <input type="text" th:field="*{subject}" id="subject"
+                   class="w-full p-4 border border-gray-300 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-300 ease-in-out placeholder-gray-400 placeholder-opacity-70">
+        </div>
+
+        <!-- 내용 입력 -->
+        <div class="mb-6">
+            <label for="content" class="block text-gray-800 text-lg font-semibold mb-2">글 내용</label>
+            <textarea th:field="*{content}" id="content" rows="6"
+                      class="w-full p-4 border border-gray-300 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-300 ease-in-out placeholder-gray-400 placeholder-opacity-70"></textarea>
+        </div>
+
+        <!-- 버튼 -->
+        <div class="flex justify-end">
+            <button sec:authorize="hasRole('ADMIN')" type="submit"
+                    class="w-full bg-blue-600 text-white p-3 rounded-lg shadow-lg hover:bg-blue-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                수정 완료
+            </button>
+        </div>
+    </form>
+</div>
+</body>
+
+</html>

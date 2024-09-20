@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}">
+<head>
+    <title>포트폴리오</title>
+    <!-- 추가적인 CSS, JS 파일이 필요하다면 여기에 추가 -->
+</head>
+<body layout:fragment="content">
+
+    <div id="data-container" th:data-my-variable="${contextPath}"></div>
+
+    <h1 class="text-3xl mb-6 text-center">포트폴리오</h1>
+
+    <!-- 가운데 세로 정렬된 버튼들 -->
+    <div class="flex flex-col items-center space-y-16">
+        <!-- 1차 프로젝트 (초록 계열) -->
+        <div class="flex flex-col items-center space-y-4">
+            <h2 class="w-48 px-4 py-2 text-base font-bold whitespace-nowrap">HTML, CSS 활용한 홈페이지 제작</h2>
+            <a class="w-48 px-4 py-2 text-base font-medium text-white bg-green-500 hover:bg-green-600" href="https://villagabae.netlify.app">1차 프로젝트<차지훈,이다혜></a>
+			<a class="w-48 px-4 py-2 text-base font-medium text-white bg-green-500 hover:bg-green-600" href="https://letsgogolego.netlify.app">1차 프로젝트<이수형,김태호></a>
+            <!--<a class="w-48 px-4 py-2 text-base font-medium text-white bg-green-500 hover:bg-green-600" href="https://docs.google.com/presentation/d/1oGJBomtedoMFRLiTr2_9jjw2470KUfIkmZk39Z4x4W4/edit?usp=sharing">1차 프로젝트 PPT</a>-->
+        </div>
+
+        <!-- 2차 프로젝트 (파랑 계열) -->
+        <div class="flex flex-col items-center space-y-4">
+            <h2 class="w-48 px-4 py-2 text-base font-bold whitespace-nowrap">자바스크립트 계산기</h2>
+            <a class="w-48 px-4 py-2 text-base font-medium text-white bg-blue-500 hover:bg-blue-600" href="https://spectacularcalculator.netlify.app">2차 프로젝트<차지훈,이다혜,이수형></a>
+            <a class="w-48 px-4 py-2 text-base font-medium text-white bg-blue-500 hover:bg-blue-600" href="https://docs.google.com/presentation/d/1O9zqNGDw-m7W0edTZehoj01oryZmV106_9benjJ80K8/edit?usp=sharing">2차 프로젝트 PPT</a>
+			<a class="w-48 px-4 py-2 text-base font-medium text-white bg-blue-500 hover:bg-blue-600" href="https://calculateproject.netlify.app/">2차 프로젝트<김태호></a>
+			<a class="w-48 px-4 py-2 text-base font-medium text-white bg-blue-500 hover:bg-blue-600" href="https://docs.google.com/presentation/d/16npBd2YXbITp7_psDCg46yLGRjCh8N2BhY9WfEhPcDY/edit?usp=sharing">2차 프로젝트 PPT</a>
+        </div>
+
+        <!-- 3차 프로젝트 (보라 계열) -->
+        <div class="flex flex-col items-center space-y-4">
+            <h2 class="w-48 px-4 py-2 text-base font-bold whitespace-nowrap">스프링부트로 제작한 사이트</h2>
+            <a class="w-48 px-4 py-2 text-base font-medium text-white bg-purple-500 hover:bg-purple-600" href="https://class.cofile.co.kr/wishlink">3차 프로젝트</a>
+            <a class="w-48 px-4 py-2 text-base font-medium text-white bg-purple-500 hover:bg-purple-600" href="https://docs.google.com/presentation/d/1oGJBomtedoMFRLiTr2_9jjw2470KUfIkmZk39Z4x4W4/edit?usp=sharing">3차 프로젝트 PPT</a>
+        </div>
+    </div>
+</body>
+</html>

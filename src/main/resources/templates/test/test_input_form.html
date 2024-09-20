@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>테스트</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  
+  <form action="/test/insertProc" method="post" th:object="${userDTO}">
+    <label for="name">이름:</label>
+    <input id="name" type="text" name="name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+    
+    <label for="age">나이:</label>
+    <input id="age" type="number" name="age" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+    
+    <button type="submit" id="send_btn" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">전송</button>
+  </form>
+  
+  <button id="refresh_btn" class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">목록 새로고침</button>
+  <button id="delete_btn" class="mt-4 bg-green-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">삭제</button>
+  
+  <ul id="user_list">
+    <!-- 여기에 목록이 동적으로 추가됩니다. -->
+  </ul>
+  
+  <script>
+    // DOM이 만들어지고 JS 실행===================================================//
+	
+	
+    document.addEventListener("DOMContentLoaded", () => {
+		
+		//새로고침
+      document.getElementById("refresh_btn").addEventListener('click', () => {
+        const url = "/test/insert/new";
+        
+        fetch(url, {
+          method: "GET"
+        })
+        .then(response => response.json()) // 응답을 JSON으로 파싱
+        .then(data => {
+          const userList = document.getElementById("user_list");
+          userList.innerHTML = ''; // 기존 목록 초기화
+
+          data.forEach(user => {
+            const listItem = document.createElement('li');
+			
+			const indi_delete_btn = document.createElement("button");
+			listItem.setAttribute('id', `list-${user.id}`);
+			indi_delete_btn.setAttribute('id', `delete-${user.id}`);
+			indi_delete_btn.textContent="개별삭제"
+			indi_delete_btn.classList.add('ml-4', 'bg-red-500', 'hover:bg-red-700', 'text-white', 'font-bold', 'py-1', 'px-2', 'rounded')
+			indi_delete_btn.Id
+			
+            listItem.textContent = `이름 : ${user.name} 나이 : ${user.age}  `;
+            userList.appendChild(listItem);
+			userList.appendChild(indi_delete_btn)
+			
+			
+			document.getElementById(`delete-${user.id}`).addEventListener('click', () => {
+				
+				const url = `/test/insert/delete/${user.id}`
+				fetch(url, {
+				          method: "GET"
+				        })
+				        
+						listItem.remove();
+						indi_delete_btn.remove()
+
+			})
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching user list:', error);
+        });
+      });
+    });
+	
+	
+	//삭제==================================================================//
+	
+	
+	document.getElementById("delete_btn").addEventListener('click',()=>{
+		const url = "/test/insert/delete"
+		    fetch(url, {
+		      method: "GET"
+		    })
+		    .then(response => {
+		      if (response.ok) {
+		        alert("삭제 성공");
+		        
+				const userList = document.getElementById("user_list");
+				userList.innerHTML = ''; // 기존 목록 초기화
+		      } else {
+		        alert("삭제 실패");
+		      }
+		    })
+		    .catch(error => {
+		      console.error('Error deleting user:', error);
+		    });
+		  });
+
+	//개별삭제===================================================================//
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+  </script>
+  
+</body>
+</html>

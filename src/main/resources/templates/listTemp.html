@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+</head>
+<body>
+<div>
+    <h2>성별</h2>
+    <input type="radio" id="male" name="gender" value="남성">
+    <label for="male">남자</label>
+    <input type="radio" id="female" name="gender" value="여성">
+    <label for="female">여자</label>
+</div>
+
+<div>
+    <h2>카테고리</h2>
+    <button data-category="반팔 티셔츠">반팔 티셔츠</button>
+    <button data-category="긴팔 티셔츠">긴팔 티셔츠</button>
+    <!-- 필요한 만큼 카테고리 버튼을 추가 -->
+</div>
+
+<div id="product-list">
+    <!-- API 호출 결과가 여기 렌더링됨 -->
+</div>
+
+<script>
+    // app.js
+    document.addEventListener('DOMContentLoaded', () => {
+        let selectedGender = '';
+        let selectedCategory = '';
+
+        // 성별 라디오 버튼 클릭 이벤트 리스너
+        const genderButtons = document.querySelectorAll('input[name="gender"]');
+        genderButtons.forEach(button => {
+            button.addEventListener('change', (event) => {
+                selectedGender = event.target.value;
+            });
+        });
+
+        // 카테고리 버튼 클릭 이벤트 리스너
+        const categoryButtons = document.querySelectorAll('button[data-category]');
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                selectedCategory = event.target.getAttribute('data-category');
+                fetchAndRenderProducts();
+            });
+        });
+
+        // API 호출 및 결과 렌더링 함수
+        function fetchAndRenderProducts() {
+            if (selectedGender && selectedCategory) {
+                const keyword = `${selectedGender} ${selectedCategory}`;
+                const uri = `/jihoon/productlists?keyword=${encodeURIComponent(keyword)}&quantity=30`;
+
+                fetch(uri)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("date = ", data);
+                        renderProducts(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching products:', error);
+                    });
+            }
+        }
+
+        // 상품 목록 렌더링 함수
+        function renderProducts(products) {
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = ''; // 기존 내용 초기화
+
+            products.forEach(product => {
+                const productItem = document.createElement('div');
+                productItem.textContent = `${product.title} - ${product.lprice}원`;
+                productList.appendChild(productItem);
+            });
+        }
+    });
+
+
+</script>
+</body>
+</html>

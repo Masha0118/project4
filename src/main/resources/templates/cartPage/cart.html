@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}">
+<head>
+    <title>Shopping Cart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- PayPal JavaScript SDK 추가 -->
+    <script src="https://www.paypal.com/sdk/js?client-id=Af2g-OSKwTOuaqmwYwr2X4tzTafsetaGVj1ZgL2ojb7xxATrYs0pHqUhzI9fgCIBGNNo5PhXL_XWhSz7&currency=USD"></script>
+    <script th:src="@{/js/cartFunctions.js}" defer></script>
+</head>
+<body layout:fragment="content">
+
+<div id="data-container" th:data-my-variable="${contextPath}"></div> <!-- contextPath를 전달하는 hidden div -->
+
+<div class="container mx-auto mt-10">
+    <div class="flex shadow-md my-10">
+        <!-- 장바구니 항목 -->
+        <div class="w-3/4 bg-white px-10 py-10">
+            <div class="pb-1">
+                <h1 class="font-semibold text-3xl mb-4">장바구니</h1>
+                <div class="flex justify-end items-center mt-1">
+                    <!-- 선택 삭제 버튼 -->
+                    <button id="delete-selected-btn" class="text-sm font-semibold text-gray-600 px-4 py-2 hover:bg-gray-300 border border-gray-300">선택 삭제</button>
+                </div>
+            </div>
+
+            <div class="flex mt-3 mb-5 border-b border-t pb-5 pt-5">
+                <!-- 전체 선택 체크박스 -->
+                <div class="w-1/12 flex justify-center items-center">
+                    <input type="checkbox" id="select-all-checkbox" class="mr-2">
+                    <label for="select-all-checkbox" class="text-sm font-semibold text-gray-600"></label>
+                </div>
+                <h3 class="text-center font-semibold text-gray-600 text-xs uppercase w-3/5">상품 상세</h3>
+                <h3 class="font-semibold text-center text-gray-600 text-xs uppercase w-1/6 text-center">수량</h3>
+                <h3 class="font-semibold text-center text-gray-600 text-xs uppercase w-1/5 text-center">가격</h3>
+                <h3 class="font-semibold text-center text-gray-600 text-xs uppercase w-1/5 text-center">총액</h3>
+                <h3 class="w-1/12"></h3>
+            </div>
+
+            <div id="cart-items">
+                <!-- 장바구니 아이템이 여기에 동적으로 렌더링됨 -->
+            </div>
+
+            <a th:href="@{/productlist}" class="flex font-semibold text-indigo-600 text-sm mt-10">
+                <svg class="fill-current mr-2 text-indigo-600 w-4" viewBox="0 0 448 512"><path d="M134.059 296H432c8.837 0 16-7.163 16-16v-48c0-8.837-7.163-16-16-16H134.059l52.7-52.704c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.248-16.379-6.248-22.627 0L9.373 239.373c-6.248 6.248-6.248 16.379 0 22.627l132.132 132.131c6.248 6.248 16.379 6.248 22.627 0l22.627-22.627c6.248-6.248 6.248-16.379 0-22.627L134.059 296z"/></svg>
+                계속 쇼핑하기
+            </a>
+        </div>
+
+        <!-- 요약 -->
+        <div id="cart-summary" class="w-1/4 px-8 py-10 bg-gray-100">
+            <h1 class="font-semibold text-2xl border-b pb-8">결제 요약</h1>
+            <div class="flex justify-between mt-10 mb-5">
+                <span class="font-semibold text-sm uppercase">상품 수량</span>
+                <span class="font-semibold text-sm" id="summary-item-count">0건</span>
+            </div>
+            <div class="flex justify-between mt-10 mb-5">
+                <span class="font-semibold text-sm uppercase">배송비</span>
+                <span class="font-semibold text-sm" id="shipping-cost-display">0 원</span>
+            </div>
+            <div class="text-sm text-gray-500 mb-5">
+                50,000원 이상 구매 시 무료배송
+            </div>
+            <div class="border-t mt-8">
+                <div class="flex font-semibold justify-between py-6 text-sm uppercase">
+                    <span>총 합계</span>
+                    <span id="total-price">0 원</span>
+                </div>
+                <div class="text-sm text-gray-500 mb-5">
+                    결제 금액은 현재 환율에 따라 미국 달러(USD)로 변환되어 PayPal을 통해 결제됩니다.
+                </div>
+                <!-- 예상 결제 금액 (USD) 추가 -->
+                <div class="flex font-semibold justify-between py-6 text-sm uppercase">
+                    <span>예상 결제 금액 (USD)</span>
+                    <span id="estimated-usd-price">$0.00</span>
+                </div>
+
+                <!-- PayPal 버튼 추가 -->
+                <div id="paypal-button-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 삭제 확인 모달 -->
+<div id="delete-confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-sm mx-auto">
+        <div class="flex justify-center mb-4">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </div>
+        </div>
+        <h2 class="text-2xl font-bold text-center text-gray-800 mb-4">삭제 확인</h2>
+        <p class="text-center text-gray-600 mb-6">정말로 이 상품을 삭제하시겠습니까?</p>
+        <div class="flex justify-between">
+            <button id="cancel-delete-btn" class="w-full bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2 hover:bg-gray-400">취소</button>
+            <button id="confirm-delete-btn" class="w-full bg-red-500 text-white px-4 py-2 rounded ml-2 hover:bg-red-600">삭제</button>
+        </div>
+    </div>
+</div>
+
+<!-- 삭제 완료 메시지 모달 -->
+<div id="delete-success-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-sm mx-auto">
+        <div class="flex justify-center mb-4">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+        </div>
+        <h2 class="text-2xl font-bold text-center text-gray-800 mb-4">삭제 완료</h2>
+        <p class="text-center text-gray-600 mb-6">선택하신 상품이 성공적으로 삭제되었습니다.</p>
+        <button id="close-success-modal-btn" class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">확인</button>
+    </div>
+</div>
+
+
+</body>
+</html>

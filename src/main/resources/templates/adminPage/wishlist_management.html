@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko" layout:decorate="~{adminPage/layout_ad}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>wishlist Management</title>
+</head>
+<body>
+    <div layout:fragment="content_ad" class="container mt-4">
+		
+		<div id="data-container" th:data-my-variable="${contextPath}"></div>
+		
+        <h1>wishlist Management</h1>
+
+        <!-- 테이블 -->
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">구분</th>
+                    <th scope="col">Username</th>
+                    <th scope="col">카테고리 개수</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="wishlist : ${wishlistsPage.content}">
+                    <th scope="row" th:text="${wishlist.id}"></th>
+                    <td th:text="${wishlist.user.username}"></td>
+                    <td th:text="${wishlist.mycategories.size() + 1}"></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <!-- 페이지네이션 -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <li class="page-item" th:classappend="${wishlistsPage.hasPrevious() ? '' : 'disabled'}">
+                    <a class="page-link" href="#" th:href="@{/admin/publicSettings(page=${wishlistsPage.number - 1}, size=${wishlistsPage.size})}">Previous</a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, wishlistsPage.totalPages - 1)}" th:classappend="${i == wishlistsPage.number ? 'active' : ''}">
+                    <a class="page-link" th:href="@{/admin/publicSettings(page=${i}, size=${wishlistsPage.size})}" th:text="${i + 1}"></a>
+                </li>
+                <li class="page-item" th:classappend="${wishlistsPage.hasNext() ? '' : 'disabled'}">
+                    <a class="page-link" href="#" th:href="@{/admin/publicSettings(page=${wishlistsPage.number + 1}, size=${wishlistsPage.size})}">Next</a>
+                </li>
+            </ul>
+        </nav>
+        
+        <!-- 차트를 표시할 캔버스 요소 추가 -->
+        <div class="mt-5">
+            <h2>카테고리 비공개/공개 상태 비율</h2>
+            <canvas id="categoryChart"></canvas>
+        </div>
+    </div>
+    
+    <th:block layout:fragment="script">
+        <!-- Bootstrap JS and dependencies -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script th:inline="javascript">
+			
+			
+			
+			
+            let ctx = document.getElementById('categoryChart').getContext('2d');
+            let publicCount = /*[[${publicCount}]]*/ 0;
+            let privateCount = /*[[${privateCount}]]*/ 0;
+            let total = /*[[${total}]]*/ 1; // total이 0일 경우를 대비해 기본값을 1로 설정
+
+            let categoryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Public', 'Private'],
+                    datasets: [{
+                        label: '카테고리 상태 비율',
+                        data: [publicCount, privateCount],
+                        backgroundColor: ['#36a2eb', '#ff6384'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    aspectRatio: 2,
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    let value = tooltipItem.raw;
+                                    let percentage = (value / total * 100).toFixed(2);
+                                    return value + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+    </th:block>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}">
+<head>
+    <title>Product Wishlist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:src="@{/js/productlistFunctions.js}" defer></script>
+</head>
+<body layout:fragment="content">
+
+<div id="data-container" th:data-my-variable="${contextPath}"></div>
+<div class="flex flex-col lg:flex-row">
+    <!-- 사이드바: 카테고리 선택 -->
+    <div class="w-full lg:w-1/4 lg:pr-6 mb-6 lg:mb-0">
+        <div class="h-auto lg:h-screen overflow-y-auto bg-white shadow-lg rounded-lg p-4 sticky top-0"> <!-- sticky 클래스 추가 -->
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold mb-4">카테고리</h2>
+                <div class="flex flex-col space-y-3" id="category-container">
+                    <!-- 카테고리들이 동적으로 생성됨 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 메인 콘텐츠: 상품 목록 -->
+    <div class="w-full lg:w-2/4 mb-6 lg:mb-0">
+        <div id="product-list" class="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <!-- API 호출 결과가 여기 렌더링됨 -->
+        </div>
+    </div>
+
+    <!-- 비교 이력 사이드바 -->
+    <div class="w-full lg:w-1/4 lg:pl-6">
+        <div class="h-auto lg:h-screen overflow-y-auto bg-gray-50 shadow-lg rounded-lg p-4 sticky top-0"> <!-- sticky 클래스 추가 -->
+            <!-- 비교하기 버튼을 오른쪽 사이드바 상단에 위치 -->
+            <div class="mb-12">
+                <button id="compare-button" class="text-lg font-bold bg-blue-200 w-full py-2 rounded hover:bg-blue-400 hover:border-blue-500 focus:outline-none">상품 비교하기</button>
+            </div>
+            <h2 class="text-2xl font-bold mb-4">최근 비교한 상품</h2>
+            <div id="comparison-history" class="flex flex-col space-y-4">
+                <!-- 비교 이력이 동적으로 생성됨 -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 모달창 HTML 구조 -->
+<div id="wishlist-modal" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden z-999">
+    <div class="bg-white rounded-lg shadow-lg w-11/12 sm:w-3/4 max-w-md p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">위시리스트에 추가</h2>
+            <button id="close-modal" class="text-gray-600 hover:text-gray-900">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <form id="wishlist-form">
+            <div>
+                <select name="my_list" id="my_list" class="mb-4 w-full p-2 border border-gray-300 rounded">
+                    <option th:each="myCategory, iterStat : ${myCategorys}" th:value="${myCategory.id}" th:text="${myCategory.name}" th:selected="${iterStat.index == 0}"></option>
+                </select>
+            </div>
+            <p class="mb-6">이 항목을 위시리스트에 추가하시겠습니까?</p>
+
+            <div class="flex items-center mb-4">
+                <input id="default-checkbox" type="checkbox" value="private" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" checked>
+                <label for="default-checkbox" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">비공개로 저장</label>
+            </div>
+
+            <div class="flex justify-end space-x-4">
+                <button type="submit" id="add-to-wishlist" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none">추가하기</button>
+                <button type="button" id="cancel-wishlist" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 focus:outline-none">취소하기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 비교 모달창 구조 추가 -->
+<div id="compare-modal" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden z-50">
+    <div class="bg-white rounded-lg shadow-lg w-11/12 sm:w-full lg:max-w-6xl p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold">상품 비교</h2>
+            <button id="close-compare-modal" class="text-gray-600 hover:text-gray-900">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div id="comparison-container" class="overflow-auto">
+            <table class="table-auto w-full text-center">
+                <thead>
+                <tr id="comparison-header" class="bg-gray-100">
+                    <!-- 상품들이 동적으로 여기에 추가됨 -->
+                </tr>
+                </thead>
+                <tbody id="comparison-table-body">
+                <!-- 각 상품 정보가 동적으로 여기에 추가됨 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 장바구니 추가 확인 모달 -->
+<div id="cart-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+    <div class="bg-white p-10 rounded-xl shadow-2xl max-w-lg mx-auto">
+        <div class="flex items-center justify-center mb-6">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+        </div>
+        <h2 class="text-3xl font-extrabold text-center text-gray-800 mb-6">장바구니에 추가되었습니다.</h2>
+        <p class="text-center text-gray-600 mb-8">장바구니로 이동하시겠습니까?</p>
+        <div class="flex justify-between">
+            <button id="continue-shopping-btn" class="w-1/2 bg-gray-500 text-white px-6 py-4 rounded-lg hover:bg-gray-600 transition duration-300">계속 쇼핑하기</button>
+            <button id="go-to-cart-btn" class="w-1/2 ml-4 bg-blue-500 text-white px-6 py-4 rounded-lg hover:bg-blue-600 transition duration-300">장바구니로 이동</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

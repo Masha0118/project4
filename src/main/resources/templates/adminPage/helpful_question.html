@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html layout:decorate="~{adminPage/layout_ad}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>질문 목록</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // 액셀 다운
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('exportButton').addEventListener('click', function() {
+                var wb = XLSX.utils.book_new();
+                var ws = XLSX.utils.table_to_sheet(document.getElementById('dataTable'));
+                XLSX.utils.book_append_sheet(wb, ws, '유용한 질문');
+                XLSX.writeFile(wb, '유용한 질문.xlsx');
+            });
+        });
+    </script>
+</head>
+<body class="bg-light">
+<div layout:fragment="content_ad" class="container my-4">
+    <h2 class="my-4">추천을 많이 받은 질문</h2>
+    <button id="exportButton" class="btn btn-primary mb-3">다운로드</button>
+    <main class="p-4">
+        <div class="table-responsive">
+            <table id="dataTable" class="table table-bordered table-hover bg-white shadow-sm rounded-lg">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">제목</th>
+                    <th scope="col">내용</th>
+                    <th scope="col">작성자</th>
+                    <th scope="col">등록 날짜</th>
+                    <th scope="col">좋아요 수</th>
+                    <th scope="col">게시물로 이동</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- 서버에서 전달된 질문 리스트를 반복하여 표시합니다 -->
+                <tr th:each="history : ${history}" th:if="${history.votecount > 0}" class="text-dark">
+                    <td th:text="${history.id}"></td>
+                    <td th:utext="${history.subject}"></td>
+                    <td th:utext="${history.content}"></td>
+                    <td th:text="${history.author.username}"></td>
+                    <td th:text="${#temporals.format(history.createDate, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td th:text="${history.votecount}"></td>
+                    <td>
+                        <a th:href="@{/cscenter/myhistory/detail/{id}(id=${history.id})}" target="_blank" class="btn btn-success">보기</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,31 @@
+<html layout:decorate="~{adminPage/layout_ad}">
+<div layout:fragment="content_ad" class="container my-3">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form th:action="@{/admin/loginProc}" method="post" class="bg-white p-4 rounded shadow-sm">
+                <div th:if="${param.error}">
+                    <div class="alert alert-danger" role="alert">
+                        ※사용자ID 또는 비밀번호를 확인해 주세요.
+                    </div>
+                </div>
+                <div th:if="${param.access_error}">
+                    <div class="alert alert-danger" role="alert">
+                        ※접근권한이 없는 아이디입니다.
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="username" class="form-label">사용자ID</label>
+                    <input type="text" name="username" id="username" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">비밀번호</label>
+                    <input type="password" name="password" id="password" class="form-control">
+                </div>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">로그인</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</html>

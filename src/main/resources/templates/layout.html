@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Flowbite (if needed) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.js"></script>
+
+    <!-- Your Custom Stylesheet -->
+    <title>WishLink</title>
+
+    <style>
+
+		*{
+		  font-family: "Noto Sans KR", sans-serif;
+		  font-optical-sizing: auto;
+
+		  font-style: normal;
+		}
+
+    </style>
+
+</head>
+
+<body class="min-h-screen flex flex-col font-sans">
+<!-- 헤더 -->
+<header class="bg-gray-100 p-4 text-center">
+    <a th:href="@{/#}">
+        <img th:src="@{/images/logo.png}" alt="Site Logo" class="mx-auto">
+    </a>
+</header>
+
+<!-- 네비게이션바 -->
+<nav th:replace="~{navbar :: navbarFragment}" class="max-w-screen-2xl mx-auto"></nav>
+
+<div class="container mx-auto p-6 max-w-screen-2xl flex-grow">
+    <!-- 기본 템플릿 안에 삽입될 내용 Start -->
+    <th:block layout:fragment="content"></th:block>
+    <!-- 기본 템플릿 안에 삽입될 내용 End -->
+</div>
+
+
+
+<!-- Footer -->
+<footer class="bg-gray-200 text-gray-800 py-6 mt-auto">
+    <div class="container mx-auto px-4">
+        <!-- 회사 정보 -->
+        <div class="mb-4 border-b border-gray-300 pb-4">
+            <p class="text-sm">사업자등록번호: <span class="font-semibold">123-45-67890</span></p>
+            <p class="text-sm">우) 06242 서울특별시 강남구 테헤란로 123, ABC타워 5층 (역삼동) | Tel: <span class="font-semibold">02-3456-7890</span></p>
+            <p class="text-sm">대표자: 홍길동 | 이메일: <a href="mailto:info@company.co.kr" class="text-blue-600 hover:underline">info@company.co.kr</a></p>
+        </div>
+        <!-- 고객 상담 정보 -->
+        <div class="mb-4">
+            <p class="text-sm font-semibold mb-2">고객상담실</p>
+            <p class="text-sm">회원문의: <span class="font-semibold">02-3456-7891</span> (평일 09:00 - 18:00)</p>
+            <p class="text-sm">기타문의: <span class="font-semibold">02-3456-7892</span> (평일 09:00 - 18:00)</p>
+            <p class="text-sm">이메일 문의: <a href="mailto:support@company.co.kr" class="text-blue-600 hover:underline">support@company.co.kr</a></p>
+        </div>
+        <!-- 저작권 및 기타 정보 -->
+        <div class="mb-4 border-b border-gray-300 pb-4">
+            <p class="text-sm">&copy; 2024 Company Name. All Rights Reserved.</p>
+            <p class="text-sm">개인정보 처리방침 | 이용약관</p>
+        </div>
+    </div>
+</footer>
+<th:block layout:fragment="script"></th:block>
+<!-- Scripts -->
+<script th:src="@{/bootstrap.min.js}"></script>
+
+
+</body>
+
+</html>

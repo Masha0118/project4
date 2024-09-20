@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상담 등록</title>
+
+    <!-- Ensure Tailwind CSS is included in your project -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/dist/tailwind.min.css" rel="stylesheet">
+
+    <!-- Include TinyMCE -->
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@6.7.0/tinymce.min.js"></script>
+
+    <style>
+        /* Optional: Custom styles to avoid conflicts */
+        .tox-tinymce {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+        }
+
+        /* Hide TinyMCE logo */
+        .tox-statusbar__branding {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container mx-auto px-4 py-6" layout:fragment="content">
+    <div class="flex">
+        <div class="text-gray-600 text-[80%] ml-12 font-semibold mb-4" >현재 위치: 상담센터 > 상담 하기</div>
+    </div>
+    <h5 class="text-2xl font-semibold mb-4 border-b-2 border-gray-300 pb-2">상담 등록</h5>
+    <form th:object="${historyForm}" method="post" enctype="multipart/form-data" class="bg-white shadow-md rounded-lg p-6">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+        <div class="mb-4">
+            <label for="subject" class="block text-sm font-medium text-gray-700" >제목</label>
+            <input type="text" th:field="*{subject}" id="subject" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+        </div>
+        <div class="mb-4">
+            <label for="content" class="block text-sm font-medium text-gray-700">내용</label>
+            <textarea th:field="*{content}" id="contentEditor" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" rows="10"></textarea>
+        </div>
+
+        <!-- 파일 첨부 필드를 추가할 컨테이너 -->
+        <div id="fileInputsContainer" class="mb-4">
+            <label for="file1" class="block text-sm font-medium text-gray-700">파일 첨부</label>
+            <input type="file" name="files" id="file1" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" onchange="addFileInput()">
+        </div>
+
+        <!-- 비밀글 비밀번호 설정 -->
+        <div class="mb-4">
+            <div class="flex items-center">
+                <input type="checkbox" th:field="*{secret}" id="secret" class="mr-2" onclick="togglePasswordField()">
+                <label for="secret" class="block text-sm font-medium text-gray-700">비밀글로 설정</label>
+            </div>
+        </div>
+        <div class="mb-4" id="passwordField" style="display: none;">
+            <label for="password" class="block text-sm font-medium text-gray-700">비밀번호</label>
+            <input type="password" th:field="*{password}" id="password"
+                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+        </div>
+
+        <button type="submit"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">저장하기</button>
+    </form>
+
+    <!-- TinyMCE Initialization -->
+    <script>
+        tinymce.init({
+            selector: '#contentEditor',
+            menubar: false,
+            plugins: 'link image media code',
+            toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help | image media',
+            content_css: 'https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/dist/tailwind.min.css',
+
+            file_picker_types: 'image media',
+            file_picker_callback: function (callback, value, meta) {
+                if (meta.filetype === 'image') {
+                    let input = document.createElement('input');
+                    input.setAttribute('type', 'file');
+                    input.setAttribute('accept', 'image/*');
+                    input.onchange = function () {
+                        let file = this.files[0];
+                        let reader = new FileReader();
+                        reader.onload = function () {
+                            let id = 'blobid' + (new Date()).getTime();
+                            let blobCache = tinymce.activeEditor.editorUpload.blobCache;
+                            let base64 = reader.result.split(',')[1];
+                            let blobInfo = blobCache.create(id, file, base64);
+                            blobCache.add(blobInfo);
+                            callback(blobInfo.blobUri(), { title: file.name });
+                        };
+                        reader.readAsDataURL(file);
+                    };
+                    input.click();
+                }
+                if (meta.filetype === 'media') {
+                    // Handle media file uploads
+                }
+            }
+        });
+
+        // 비밀번호 체크박스 script
+        function togglePasswordField() {
+            let passwordField = document.getElementById("passwordField");
+            let secretCheckbox = document.getElementById("secret");
+
+            if(secretCheckbox.checked) {
+                passwordField.style.display = "block";
+            } else {
+                passwordField.style.display = "none";
+            }
+        }
+
+        // 동적으로 파일 첨부 필드를 추가하는 함수
+        let fileInputCount = 1;
+        function addFileInput() {
+            if (fileInputCount < 5) {
+                fileInputCount++;
+                const container = document.getElementById('fileInputsContainer');
+                const newFileInput = document.createElement('div');
+                newFileInput.className = "mb-4";
+                newFileInput.innerHTML = `
+                    <label for="file${fileInputCount}" class="block text-sm font-medium text-gray-700">파일 첨부</label>
+                    <input type="file" name="files" id="file${fileInputCount}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" onchange="addFileInput()">
+                `;
+                container.appendChild(newFileInput);
+            }
+        }
+    </script>
+</div>
+</body>
+
+</html>

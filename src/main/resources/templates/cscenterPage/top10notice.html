@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>유용한 질문</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+
+<!-- Container -->
+<div layout:fragment="content" class="container mx-auto my-3 bg-white p-6 rounded-lg shadow-lg">
+    <div class="text-gray-600 text-[80%] font-semibold mb-4">현재 위치: 상담센터 > 자주 묻는질문</div>
+    <h1 class="text-2xl font-bold mb-6">자주 묻는질문</h1>
+
+    <!-- 데이터가 있는 경우 -->
+    <div th:if="${#lists.size(history) > 0}">
+        <div th:each="history : ${history}" th:if="${history.votecount >= 1}" class="border-b border-gray-200 pb-4 mb-4">
+            <h2 class="text-xl font-semibold text-gray-800">
+                <a th:href="@{/cscenter/myhistory/detail/{id}(id=${history.id})}" th:utext="${@commonUtil.markdown(history.subject)}" class="hover:text-blue-600"></a>
+            </h2>
+            <p class="text-gray-600" th:utext="${@commonUtil.markdown(history.content)}"></p>
+            <div class="text-gray-500 text-sm">추천수: <span th:text="${history.votecount}"></span></div>
+        </div>
+    </div>
+
+    <!-- 데이터가 없는 경우 -->
+    <div th:unless="${#lists.size(history) > 0}" class="text-center text-gray-500 text-lg my-28 text-2xl">
+        데이터가 없습니다.
+    </div>
+</div>
+</body>
+</html>

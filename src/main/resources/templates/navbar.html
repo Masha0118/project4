@@ -1,0 +1,299 @@
+<nav class="bg-white border-t border-black border-b border-gray-400" th:fragment="navbarFragment"
+     xmlns:sec="http://www.w3.org/1999/xhtml">
+	 
+
+	 
+    <div class="mx-auto max-w-7xl px-1 sm:px-6 lg:px-8">
+        <div class="relative flex h-16 items-center justify-between">
+            <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
+                <!-- Mobile menu button-->
+                <button type="button"
+                        class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                        aria-controls="mobile-menu" aria-expanded="false">
+                    <span class="sr-only">Open main menu</span>
+                    <!-- Icon when menu is closed -->
+                    <svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                         aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+                    </svg>
+                    <!-- Icon when menu is open -->
+                    <svg class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                         aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+                <div class="hidden sm:ml-6 sm:block">
+                    <div class="flex space-x-6 items-center">
+                        <!-- Navigation Links -->
+                        <a th:href="@{/home}"
+                           class="rounded-md px-3 py-2 text-sm font-medium text-black hover:bg-gray-200"
+                           aria-current="page">Home</a>
+                        <a th:href="@{/productlist}"
+                           class="rounded-md px-3 py-2 text-sm font-medium text-black hover:bg-gray-200 ">상품리스트</a>
+                        <a th:if="${username!=null}" th:href="@{|/wishlist/${username}|}"
+                           class="flex rounded-md px-3 py-2 text-sm font-medium text-black hover:bg-gray-200 ">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-red-500"
+                                 viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 015.656 5.656l-1.172 1.172L10 17.485l-5.656-5.656-1.172-1.172a4 4 0 010-5.656z"/>
+                            </svg>
+                            위시리스트</a>
+                        <a th:if="${username==null}" th:href="@{/user/login}"
+                           class="flex rounded-md px-3 py-2 text-sm font-medium text-black hover:bg-gray-200 ">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-red-500"
+                                 viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 015.656 5.656l-1.172 1.172L10 17.485l-5.656-5.656-1.172-1.172a4 4 0 010-5.656z"/>
+                            </svg>
+                            위시리스트</a>
+							<a th:href="@{/cart}"
+							 class="rounded-md px-3 py-2 text-sm font-medium text-black hover:bg-gray-200"
+							                                                      aria-current="page">장바구니</a>
+                        <div class="relative inline-block text-left">
+                            <!-- Dropdown Button -->
+                            <button id="dropdownButton" type="button"
+                                    class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-medium text-black shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                상담센터
+                                <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                          d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                                          clip-rule="evenodd"/>
+                                </svg>
+                            </button>
+                            <div id="dropdownContent"
+                                 class="hidden absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                                 role="menu">
+                                <div class="py-1" role="none">
+                                    <a th:href="@{/cscenter/myhistory}" class="block px-4 py-2 text-sm text-black"
+                                       role="menuitem" tabindex="-1" id="menu-item-0">상담 내역</a>
+                                    <a th:href="@{/cscenter/noticelist}" class="block px-4 py-2 text-sm text-black"
+                                       role="menuitem" tabindex="-1" id="menu-item-1">공지사항</a>
+                                    <a th:href="@{/cscenter/top10notice}" class="block px-4 py-2 text-sm text-black"
+                                       role="menuitem" tabindex="-1" id="menu-item-2">자주묻는질문</a>
+                                    <a th:href="@{/cscenter/regcs}" class="block px-4 py-2 text-sm text-black"
+                                       role="menuitem" tabindex="-1" id="menu-item-3">상담하기</a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Login and Sign Up buttons -->
+                        <a sec:authorize="isAnonymous()" th:href="@{/user/login}"
+                           class="rounded-md px-3 py-2 text-sm font-medium text-black hover:bg-gray-200">로그인</a>
+                        <a sec:authorize="isAuthenticated()" th:href="@{/user/logout}"
+                           class="rounded-md px-3 py-2 text-sm font-medium text-black hover:bg-gray-200">로그아웃</a>
+                        <a sec:authorize="isAnonymous()"
+                           class="block rounded-md px-3 py-2 text-sm font-medium text-black hover:bg-gray-200"
+                           th:href="@{/user/signup}">회원가입</a>
+
+                        <!-- Portfolio Link -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Icon and Container -->
+            <div class="relative ml-4 flex items-center">
+                <button id="search-icon"
+                        class="p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                    <span class="sr-only">검색어를 입력하세요.</span>
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                         stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+                    </svg>
+                </button>
+                <div id="search-container"
+                     class="hidden absolute top-full right-0 mt-2 w-72 bg-white p-4 rounded-lg shadow-lg z-50">
+                    <form th:action="@{/productlist}" method="GET" id="search-form">
+                        <input type="text" name="keyword" id="search-input" placeholder="검색어를 입력하세요."
+                               class="w-full p-2 border border-gray-300 rounded-lg">
+                        <button type="submit" class="mt-2 p-2 bg-sky-500 text-white rounded-lg">검색</button>
+                        <button type="button" id="close-search"
+                                class="mt-2 p-2 bg-gray-500 text-white rounded-lg">닫기
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 인기 검색어 표시 -->
+            <div id="popular-keywords-container" class="ml-4 relative flex items-center">
+                <!-- 현재 인기 검색어를 표시 -->
+                <div id="popular-keywords"
+                     class="w-56 bg-white p-2 rounded-t-lg shadow-lg z-50 cursor-pointer border-b border-gray-300 mr-3">
+                    <ul id="keyword-list">
+                        <li id="current-keyword" class="text-blue-500 hover:text-blue-700 text-sm"></li>
+                    </ul>
+                </div>
+
+                <!-- 마우스를 올렸을 때 표시되는 전체 키워드 리스트 -->
+                <div id="keyword-dropdown"
+                     class="hidden absolute top-full w-full bg-white rounded-b-lg shadow-lg z-50 border-t border-gray-300">
+                    <ul>
+                        <li th:each="keyword, iterStat : ${popularKeywords}">
+                            <a th:href="@{|/productlist?keyword=${keyword}|}"
+                               class="block px-4 py-2 text-blue-500 hover:text-blue-700 text-sm">
+                                <span th:text="${iterStat.count} + '. ' + ${keyword}"></span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+
+            <!-- 프로필 이미지와 사용자 이름 -->
+            <div th:if="${username!=null}"
+                 class="rounded-md bg-gray-100 px-3 py-2 text-sm font-medium ml-auto flex items-center">
+                <a th:href="@{|/mypage/${username}|}" class="no-underline flex items-center">
+                    <!-- 프로필 이미지 태그 -->
+                    <img th:src="${profileImageFilename}" class="rounded-full w-8 h-8 object-cover mr-2" id="profileImage"/>
+                    <!-- 사용자 이름 -->
+                    <strong th:text="${principalName}"></strong>님의 마이페이지
+                </a>
+				
+            </div>
+			<a class="absolute bottom-20 right-0 mt-4 mr-4 rounded-md px-3 py-2 text-base font-medium text-white bg-green-500 hover:bg-green-600 hover:text-white"
+			   th:href="@{/portfolio}">
+			    포트폴리오
+			</a>
+			
+			<div sec:authorize="hasRole('ADMIN')">
+			    <a th:href="@{/admin}">
+			        <img th:src="@{/images/admin.png}" class="rounded-full absolute w-12 h-12 bottom-20 transition duration-300 ease-in-out hover:scale-110 hover:shadow-lg hover:bg-gray-300 p-2">
+			    </a>
+			</div>
+        </div>
+    </div>
+
+
+    <div class="sm:hidden" id="mobile-menu">
+        <div class="space-y-1 px-2 pb-3 pt-2">
+
+            <a th:href="@{/home}" class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page">Home</a>
+            <a th:href="@{/productlist}" class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page">상품리스트</a>
+            <a th:if="${username!=null}" th:href="@{|/wishlist/${username}|}"
+               class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page">위시리스트</a>
+            <a th:if="${username==null}" th:href="@{/user/login}"
+               class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page">위시리스트</a>
+			   <a th:href="@{/cart}"
+			    class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+			                                                         aria-current="page">장바구니</a>
+			   
+            <a th:href="@{/cscenter/myhistory}"
+               class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page">상담내역</a>
+            <a th:href="@{/cscenter/noticelist}"
+               class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page">공지사항</a>
+            <!--<a></a>-->
+            <a th:if="${username!=null}" th:href="@{/user/logout}"
+               class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page">로그아웃</a>
+            <a th:if="${username==null}" th:href="@{/user/login}"
+               class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page">로그인</a>
+            <a th:if="${username==null}" class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page" th:href="@{/user/signup}">회원가입</a>
+
+
+        </div>
+    </div>
+    <script>
+        // 드롭다운 메뉴와 버튼을 위한 요소를 선택
+        const dropdownButton = document.getElementById('dropdownButton');
+        const dropdownContent = document.getElementById('dropdownContent');
+        // 드롭다운 버튼 클릭 이벤트 핸들러
+        dropdownButton.addEventListener('click', function () {
+            // 드롭다운 컨텐츠의 보이기/숨기기 상태를 토글
+            dropdownContent.classList.toggle('hidden');
+            console.log('Dropdown content visibility:', dropdownContent.classList.contains('hidden')); // 클래스 토글 상태 확인용 로그
+        });
+        // 화면 어느 곳이든 클릭했을 때의 이벤트 핸들러
+        window.addEventListener('click', function (e) {
+            // 드롭다운 버튼 또는 컨텐츠 외부 클릭 시 드롭다운 숨기기
+            if (!dropdownButton.contains(e.target) && !dropdownContent.contains(e.target)) {
+                dropdownContent.classList.add('hidden');
+            }
+        });
+
+        const searchIcon = document.getElementById('search-icon');
+        const searchContainer = document.getElementById('search-container');
+        const closeSearch = document.getElementById('close-search');
+        searchIcon.addEventListener('click', function (event) {
+            event.preventDefault();
+            searchContainer.classList.toggle('hidden');
+        });
+        closeSearch.addEventListener('click', function () {
+            searchContainer.classList.add('hidden');
+        });
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const profileImageElement = document.getElementById('profileImage');
+
+
+			
+			
+            // 프로필 이미지가 이미 설정되어 있다면 fetch 요청을 하지 않음
+            if (profileImageElement && profileImageElement.src.includes('default_profile.jpeg')) {
+                fetch(`${contextPath}/profileImage`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Profile image not found');
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        const objectURL = URL.createObjectURL(blob);
+                        profileImageElement.src = objectURL;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching profile image:', error);
+                        profileImageElement.src = `${contextPath}/images/default_profile.jpeg`;
+                    });
+            }
+        });
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const keywords = /*[[${popularKeywords}]]*/ '[[${popularKeywords}]]'.replace(/^\[|\]$/g, '').split(', ');
+            const keywordList = document.getElementById('current-keyword');
+            const keywordDropdown = document.getElementById('keyword-dropdown');
+
+            let currentKeywordIndex = 0;
+
+            let dataContainer = document.getElementById('data-container');
+            let contextPath = dataContainer.getAttribute('data-my-variable');
+            contextPath = contextPath === null ? "" : contextPath;
+
+            function showNextKeyword() {
+                if (keywords.length > 0) {
+                    const rank = currentKeywordIndex + 1;
+					keywordList.innerHTML = `
+
+
+
+					    <a href="${contextPath}/productlist?keyword=${encodeURIComponent(keywords[currentKeywordIndex])}">
+
+					        ${rank}. ${keywords[currentKeywordIndex]}
+					    </a>`;
+                    currentKeywordIndex = (currentKeywordIndex + 1) % keywords.length;
+                }
+            }
+
+            showNextKeyword();
+            setInterval(showNextKeyword, 3500);
+
+            const popularKeywordsContainer = document.getElementById('popular-keywords-container');
+            popularKeywordsContainer.addEventListener('mouseover', function () {
+                keywordDropdown.classList.remove('hidden');
+            });
+
+            popularKeywordsContainer.addEventListener('mouseout', function () {
+                keywordDropdown.classList.add('hidden');
+            });
+        });
+    </script>
+</nav>

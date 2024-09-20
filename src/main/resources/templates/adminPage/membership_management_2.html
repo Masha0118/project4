@@ -1,0 +1,102 @@
+<!doctype html>
+
+
+<html lang="ko" layout:decorate="~{adminPage/layout_ad}" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Membership Management</title>
+</head>
+<body>
+<div layout:fragment="content_ad" class="container mt-4">
+    <h1>Membership Management</h1>
+    <div id="userCount" th:text="'총 회원수 :' + ${userCount} + '명'"></div>
+
+	<div id="data-container" th:data-my-variable="${contextPath}"></div>
+	
+    <h2 class="mt-4">회원 목록</h2>
+	<div id= "rowContainer">
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Username</th>
+            <th scope="col">Email</th>
+			<th scope="col">권한 상태</th>
+			<th scope="col">권한부여</th>
+			<th scope="col">관리</th>
+        </tr>
+        </thead>
+        <tbody>
+			
+			<tr th:if="0 == ${users.size()}">
+				<td>조회 가능한 데이터가 없습니다.</td>
+			</tr>
+        	<tr th:if=" 0 != ${users.size()}" th:each="user : ${users}">
+				
+	            <th scope="row" th:text="${user.id}"></th>
+	            <td th:text="${user.username}"></td>
+	            <td th:text="${user.email}"></td>
+				<td th:id="'RoleState_'+${user.id}" th:text="${user.role == 'ADMIN' ? 'ADMIN' : ''}"></td>
+				<td  class="bg-gray-400 text-white px-4 py-2 rounded" th:id="'changeRole_btn'+${user.id}">
+						<button th:onclick="'changeRole(' + ${user.id} + ')'">전환</button>
+				</td>
+				<td>
+	<!--				<button th:onclick="'deleteAccount(' + ${user.id} + ')'">삭제</button>-->
+					<button><a th:href="@{'/admin/usermanagement/delete/'+${user.id}}">삭제</a></button>
+				</td>
+			
+        	</tr>
+			
+        </tbody>
+    </table>
+	</div>
+	<script>
+
+		let dataContainer = document.getElementById('data-container');
+		let contextPath = dataContainer.getAttribute('data-my-variable');
+		contextPath = contextPath === null ? "" : contextPath;
+		
+		
+		
+		
+		function changeRole(UserId){
+			const changeRole_btn= document.getElementById(`changeRole_btn${UserId}`)
+			const RoleState = document.getElementById(`RoleState_${UserId}`)
+				RoleState.innerHTML=''
+			const url = `${contextPath}/admin/usermanagement/changeRole/${UserId}`;
+			fetch(url,{
+				method : "get"
+			})
+			.then(response => response.json() )
+			.then(user =>{
+				console.log(user)
+				if(user.role == "ADMIN"){
+					RoleState.innerHTML =`ADMIN`
+				}else{
+					RoleState.innerHTML=``
+				}
+				
+			})				
+		}	
+
+		
+		function deleteAccount(UserId){
+			
+			const rowContainer = document.getElementById(`rowContainer`);
+			rowContainer.innerHTML=""
+			
+			const url = `${contextPath}/admin/usermanagement/delete/${UserId}`;
+			fetch(url, { method: "GET" })
+		
+		}
+	</script>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>My Page</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
+
+    <style>
+
+        * {
+            font-family: "Noto Sans KR", sans-serif;
+            font-optical-sizing: auto;
+
+            font-style: normal;
+        }
+
+    </style>
+</head>
+<body class="bg-gray-100">
+<!-- 비밀번호 변경 성공 시 alert 창 띄우기 -->
+<script th:if="${passwordChanged}">
+    alert('비밀번호가 성공적으로 변경되었습니다.');
+</script>
+
+<header class="bg-gray-100 p-4 text-center">
+    <a th:href="@{/#}">
+        <img th:src="@{/images/logo.png}" alt="Site Logo" class="mx-auto">
+    </a>
+</header>
+<nav class="bg-white border-t border-black border-b border-gray-400" th:fragment="navbarFragment"
+     xmlns:sec="http://www.w3.org/1999/xhtml">
+
+
+
+    <div class="mx-auto max-w-7xl px-1 sm:px-6 lg:px-8">
+        <div class="relative flex h-16 items-center justify-between">
+            <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
+                <!-- Mobile menu button-->
+                <button type="button"
+                        class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                        aria-controls="mobile-menu" aria-expanded="false">
+                    <span class="sr-only">Open main menu</span>
+                    <!-- Icon when menu is closed -->
+                    <svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                         aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+                    </svg>
+                    <!-- Icon when menu is open -->
+                    <svg class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                         aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+                <div class="hidden sm:ml-6 sm:block">
+                    <div class="flex space-x-6 items-center">
+                        <!-- Navigation Links -->
+                        <a th:href="@{/home}"
+                           class="rounded-md px-3 py-2 text-sm font-medium text-black hover:bg-gray-200"
+                           aria-current="page">Home</a>
+                        <a th:href="@{/productlist}"
+                           class="rounded-md px-3 py-2 text-sm font-medium text-black hover:bg-gray-200 ">상품리스트</a>
+                        <a th:href="@{|/wishlist/${userId}|}"
+                           class="flex rounded-md px-3 py-2 text-sm font-medium text-black hover:bg-gray-200 ">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-red-500"
+                                 viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 015.656 5.656l-1.172 1.172L10 17.485l-5.656-5.656-1.172-1.172a4 4 0 010-5.656z"/>
+                            </svg>
+                            위시리스트</a>
+                        <a th:href="@{/cart}"
+                           class="rounded-md px-3 py-2 text-sm font-medium text-black hover:bg-gray-200"
+                           aria-current="page">장바구니</a>
+                        <div class="relative inline-block text-left">
+                            <!-- Dropdown Button -->
+                            <button id="dropdownButton" type="button"
+                                    class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-medium text-black shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                상담센터
+                                <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                          d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                                          clip-rule="evenodd"/>
+                                </svg>
+                            </button>
+                            <div id="dropdownContent"
+                                 class="hidden absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                                 role="menu">
+                                <div class="py-1" role="none">
+                                    <a th:href="@{/cscenter/myhistory}" class="block px-4 py-2 text-sm text-black"
+                                       role="menuitem" tabindex="-1" id="menu-item-0">상담 내역</a>
+                                    <a th:href="@{/cscenter/noticelist}" class="block px-4 py-2 text-sm text-black"
+                                       role="menuitem" tabindex="-1" id="menu-item-1">공지사항</a>
+                                    <a th:href="@{/cscenter/top10notice}" class="block px-4 py-2 text-sm text-black"
+                                       role="menuitem" tabindex="-1" id="menu-item-2">자주묻는질문</a>
+                                    <a th:href="@{/cscenter/regcs}" class="block px-4 py-2 text-sm text-black"
+                                       role="menuitem" tabindex="-1" id="menu-item-3">상담하기</a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Login and Sign Up buttons -->
+                        <a sec:authorize="isAnonymous()" th:href="@{/user/login}"
+                           class="rounded-md px-3 py-2 text-sm font-medium text-black hover:bg-gray-200">로그인</a>
+                        <a sec:authorize="isAuthenticated()" th:href="@{/user/logout}"
+                           class="rounded-md px-3 py-2 text-sm font-medium text-black hover:bg-gray-200">로그아웃</a>
+                        <a sec:authorize="isAnonymous()"
+                           class="block rounded-md px-3 py-2 text-sm font-medium text-black hover:bg-gray-200"
+                           th:href="@{/user/signup}">회원가입</a>
+
+                        <!-- Portfolio Link -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Icon and Container -->
+            <div class="relative ml-4 flex items-center">
+                <button id="search-icon"
+                        class="p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                    <span class="sr-only">검색어를 입력하세요.</span>
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                         stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+                    </svg>
+                </button>
+                <div id="search-container"
+                     class="hidden absolute top-full right-0 mt-2 w-72 bg-white p-4 rounded-lg shadow-lg z-50">
+                    <form th:action="@{/productlist}" method="GET" id="search-form">
+                        <input type="text" name="keyword" id="search-input" placeholder="검색어를 입력하세요."
+                               class="w-full p-2 border border-gray-300 rounded-lg">
+                        <button type="submit" class="mt-2 p-2 bg-blue-500 text-white rounded-lg" >검색</button>
+                        <button type="button" id="close-search"
+                                class="mt-2 p-2 bg-gray-500 text-white rounded-lg">닫기
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 인기 검색어 표시 -->
+            <div id="popular-keywords-container" class="ml-4 relative flex items-center">
+                <!-- 현재 인기 검색어를 표시 -->
+                <div id="popular-keywords"
+                     class="w-56 bg-white p-2 rounded-t-lg shadow-lg z-50 cursor-pointer border-b border-gray-300 mr-3">
+                    <ul id="keyword-list">
+                        <li id="current-keyword" class="text-blue-500 hover:text-blue-700 text-sm"></li>
+                    </ul>
+                </div>
+
+                <!-- 마우스를 올렸을 때 표시되는 전체 키워드 리스트 -->
+                <div id="keyword-dropdown"
+                     class="hidden absolute top-full w-full bg-white rounded-b-lg shadow-lg z-50 border-t border-gray-300">
+                    <ul>
+                        <li th:each="keyword, iterStat : ${popularKeywords}">
+                            <a th:href="@{|/productlist?keyword=${keyword}|}"
+                               class="block px-4 py-2 text-blue-500 hover:text-blue-700 text-sm">
+                                <span th:text="${iterStat.count} + '. ' + ${keyword}"></span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+
+            <!-- 프로필 이미지와 사용자 이름 -->
+            <div th:if="${username!=null}"
+                 class="rounded-md bg-gray-100 px-3 py-2 text-sm font-medium ml-auto flex items-center">
+                <a th:href="@{|/mypage/${userId}|}" class="no-underline flex items-center">
+                    <!-- 프로필 이미지 태그 -->
+                    <img th:src="${profileImageFilename}" class="rounded-full w-8 h-8 object-cover mr-2" id="profileImage"/>
+                    <!-- 사용자 이름 -->
+                    <strong th:text="${principalName}"></strong>님의 마이페이지
+                </a>
+
+            </div>
+            <a class="absolute bottom-20 right-0 mt-4 mr-4 rounded-md px-3 py-2 text-base font-medium text-white bg-green-500 hover:bg-green-600 hover:text-white"
+               th:href="@{/portfolio}">
+                포트폴리오
+            </a>
+
+            <div sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/admin}">
+                    <img th:src="@{/images/admin.png}" class="rounded-full absolute w-12 h-12 bottom-20 transition duration-300 ease-in-out hover:scale-110 hover:shadow-lg hover:bg-gray-300 p-2">
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="sm:hidden" id="mobile-menu">
+        <div class="space-y-1 px-2 pb-3 pt-2">
+
+            <a th:href="@{/home}" class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page">Home</a>
+            <a th:href="@{/productlist}" class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page">상품리스트</a>
+            <a th:if="${username!=null}" th:href="@{|/wishlist/${username}|}"
+               class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page">위시리스트</a>
+            <a th:if="${username==null}" th:href="@{/user/login}"
+               class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page">위시리스트</a>
+            <a th:href="@{/cart}"
+               class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page">장바구니</a>
+
+            <a th:href="@{/cscenter/myhistory}"
+               class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page">상담내역</a>
+            <a th:href="@{/cscenter/noticelist}"
+               class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page">공지사항</a>
+            <!--<a></a>-->
+            <a th:if="${username!=null}" th:href="@{/user/logout}"
+               class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page">로그아웃</a>
+            <a th:if="${username==null}" th:href="@{/user/login}"
+               class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page">로그인</a>
+            <a th:if="${username==null}" class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
+               aria-current="page" th:href="@{/user/signup}">회원가입</a>
+
+
+        </div>
+    </div>
+    <script>
+        // 드롭다운 메뉴와 버튼을 위한 요소를 선택
+        const dropdownButton = document.getElementById('dropdownButton');
+        const dropdownContent = document.getElementById('dropdownContent');
+        // 드롭다운 버튼 클릭 이벤트 핸들러
+        dropdownButton.addEventListener('click', function () {
+            // 드롭다운 컨텐츠의 보이기/숨기기 상태를 토글
+            dropdownContent.classList.toggle('hidden');
+            console.log('Dropdown content visibility:', dropdownContent.classList.contains('hidden')); // 클래스 토글 상태 확인용 로그
+        });
+        // 화면 어느 곳이든 클릭했을 때의 이벤트 핸들러
+        window.addEventListener('click', function (e) {
+            // 드롭다운 버튼 또는 컨텐츠 외부 클릭 시 드롭다운 숨기기
+            if (!dropdownButton.contains(e.target) && !dropdownContent.contains(e.target)) {
+                dropdownContent.classList.add('hidden');
+            }
+        });
+
+        const searchIcon = document.getElementById('search-icon');
+        const searchContainer = document.getElementById('search-container');
+        const closeSearch = document.getElementById('close-search');
+        searchIcon.addEventListener('click', function (event) {
+            event.preventDefault();
+            searchContainer.classList.toggle('hidden');
+        });
+        closeSearch.addEventListener('click', function () {
+            searchContainer.classList.add('hidden');
+        });
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const profileImageElement = document.getElementById('profileImage');
+
+
+
+
+            // 프로필 이미지가 이미 설정되어 있다면 fetch 요청을 하지 않음
+            if (profileImageElement && profileImageElement.src.includes('default_profile.jpeg')) {
+                fetch(`${contextPath}/profileImage`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Profile image not found');
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        const objectURL = URL.createObjectURL(blob);
+                        profileImageElement.src = objectURL;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching profile image:', error);
+                        profileImageElement.src = `${contextPath}/images/default_profile.jpeg`;
+                    });
+            }
+        });
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const keywords = /*[[${popularKeywords}]]*/ '[[${popularKeywords}]]'.replace(/^\[|\]$/g, '').split(', ');
+            const keywordList = document.getElementById('current-keyword');
+            const keywordDropdown = document.getElementById('keyword-dropdown');
+
+            let currentKeywordIndex = 0;
+
+            let dataContainer = document.getElementById('data-container');
+            let contextPath = dataContainer.getAttribute('data-my-variable');
+            contextPath = contextPath === null ? "" : contextPath;
+
+            function showNextKeyword() {
+                if (keywords.length > 0) {
+                    const rank = currentKeywordIndex + 1;
+                    keywordList.innerHTML = `
+
+
+
+					    <a href="${contextPath}/productlist?keyword=${encodeURIComponent(keywords[currentKeywordIndex])}">
+
+					        ${rank}. ${keywords[currentKeywordIndex]}
+					    </a>`;
+                    currentKeywordIndex = (currentKeywordIndex + 1) % keywords.length;
+                }
+            }
+
+            showNextKeyword();
+            setInterval(showNextKeyword, 3500);
+
+            const popularKeywordsContainer = document.getElementById('popular-keywords-container');
+            popularKeywordsContainer.addEventListener('mouseover', function () {
+                keywordDropdown.classList.remove('hidden');
+            });
+
+            popularKeywordsContainer.addEventListener('mouseout', function () {
+                keywordDropdown.classList.add('hidden');
+            });
+        });
+    </script>
+</nav>
+
+<div layout:fragment="content">
+
+    <div id="data-container" th:data-my-variable="${contextPath}"></div>
+
+    <div class="flex min-h-screen w-full justify-center">
+        <div class="flex w-4/5">
+            <!-- 왼쪽 네비게이션 바 -->
+            <nav class="bg-white p-6 shadow-lg h-screen flex flex-col border-r-2 border-gray-300">
+                <h2 class="text-xl font-semibold mb-6">마이페이지</h2>
+                <ul class="space-y-4 flex-grow">
+                    <!--                <li>-->
+                    <!--                    <a th:href="@{/mypage/edit}"-->
+                    <!--                       class="block px-4 py-2 text-gray-700 hover:bg-blue-500 hover:text-white rounded">개인정보 수정</a>-->
+                    <!--                </li>-->
+                    <li>
+                        <!-- 쪽지함 모달 버튼 -->
+                        <button id="openMessageModal"
+                                class="block px-4 py-2 text-gray-700 hover:bg-blue-500 hover:text-white rounded">쪽지함
+                        </button>
+                    </li>
+                    <li>
+                        <!-- 친구 목록 버튼 -->
+                        <button id="openFriendsModal"
+                                class="block px-4 py-2 text-gray-700 hover:bg-blue-500 hover:text-white rounded">친구 목록
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- 메인 콘텐츠 영역 -->
+            <div class="p-6 bg-white w-2/3">
+                <h2 class="text-xl font-bold mb-4" th:text="'안녕하세요, ' + ${currentUsername} + '님! 환영합니다!'">
+                    [currentUsername]
+                    님 환영합니다!</h2>
+                <input type="hidden" th:value="${userId}" id="hiddenIdValue">
+
+                <!-- 프로필 사진 영역 -->
+
+                <div class="mt-6">
+                    <div class="w-40 h-40 bg-white border border-gray-400 rounded-full flex items-center justify-center">
+                        <img id="profileImages" alt="Profile Image" class="rounded-full w-full h-full object-cover"/>
+                    </div>
+
+                    <div class="border border-gray-400 rounded-lg p-4 mt-4" style="max-width: 300px; margin: 0;">
+                        <p id="noImageText" class="text-gray-500" style="display: none;">프로필 사진이 등록되지 않았습니다.</p>
+
+                        <form id="uploadForm" th:action="@{|/mypage/${userId}/uploadprofile|}" method="post"
+                              enctype="multipart/form-data" class="mt-4">
+                            <div>
+                                <label for="profileImageInput" class="block text-gray-700">프로필 사진 업로드:</label>
+                                <input type="file" id="profileImageInput" name="profileImage" accept="image/*"
+                                       class="mt-2 p-2 border border-gray-300 rounded w-full" required/>
+                            </div>
+                            <button type="submit" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">업로드</button>
+                        </form>
+                    </div>
+                    <a href="/wishlink/user/change-password" class="text-blue-500 hover:text-blue-700 text-sm">비밀번호
+                        변경</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- 쪽지함 모달 창 -->
+<div id="messageModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl">
+            <div class="p-6">
+                <h2 class="text-2xl font-semibold mb-4">쪽지함</h2>
+
+                <!-- 탭 메뉴 -->
+                <div class="flex border-b mb-4">
+                    <button id="receivedTab"
+                            class="px-4 py-2 text-gray-700 hover:bg-gray-200 focus:outline-none focus:bg-gray-200">
+                        받은 쪽지함
+                    </button>
+                    <button id="sentTab" class="px-4 py-2 text-gray-700 hover:bg-gray-200 focus:outline-none">보낸 쪽지함
+                    </button>
+                    <button id="sendMessageTab"
+                            class="px-4 py-2 text-gray-700 hover:bg-gray-200 focus:outline-none">쪽지
+                        보내기
+                    </button>
+                </div>
+
+                <!-- 받은 쪽지함 리스트 -->
+                <div id="receivedMessages" class="message-list">
+                    <table class="min-w-full bg-white border border-gray-300">
+                        <thead>
+                        <tr>
+                            <th class="py-2 px-4 border-b">보낸 사람</th>
+                            <th class="py-2 px-4 border-b">제목</th>
+                            <th class="py-2 px-4 border-b">내용</th>
+                        </tr>
+                        </thead>
+                        <tbody id="receivedMessagesBody">
+                        <!-- 메시지 데이터가 여기에 추가됩니다 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 쪽지 미니 모달 -->
+                <div id="miniMessageModal"
+                     class="hidden fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
+                    <div class="bg-white p-4 rounded shadow-lg w-96">
+                        <div id="modalSender" class="font-bold mb-2"></div>
+                        <div id="modalContent"
+                             class="modal-content-body max-h-48 overflow-y-auto p-2 bg-gray-100 border border-gray-300 rounded"></div>
+                        <button id="closeMiniModal" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">닫기</button>
+                    </div>
+                </div>
+
+                <!-- 보낸 쪽지함 리스트 -->
+                <div id="sentMessages" class="message-list hidden"> <!-- 초기에는 숨김 -->
+                    <table class="min-w-full bg-white border border-gray-300">
+                        <thead>
+                        <tr>
+                            <th class="py-2 px-4 border-b">받은 사람</th>
+                            <th class="py-2 px-4 border-b">제목</th>
+                            <th class="py-2 px-4 border-b">내용</th>
+                        </tr>
+                        </thead>
+                        <tbody id="sentMessagesBody">
+                        <!-- 메시지 데이터가 여기에 추가됩니다 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 보낸 메시지 모달 창 -->
+                <div id="miniSentMessageModal"
+                     class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
+                    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                        <h2 class="text-xl font-bold mb-4" id="modalSentReceiver">받은 사람: </h2>
+                        <p class="mb-4 break-words" id="modalSentContent">내용: </p>
+                        <button id="closeMiniSentModal" class="px-4 py-2 bg-red-500 text-white rounded">닫기</button>
+                    </div>
+                </div>
+
+                <!-- 쪽지 보내기 폼 -->
+                <div id="sendMessageForm" class="message-list hidden">
+                    <div class="mb-4">
+                        <label for="recipient" class="block text-gray-700">받는 사람:</label>
+                        <!-- 드롭다운 메뉴와 직접 입력할 수 있는 텍스트 필드 -->
+                        <div class="flex">
+                            <select id="recipientDropdown" class="mt-2 p-2 border border-gray-300 rounded w-full">
+                                <option value="" disabled selected>친구를 선택하세요</option>
+                            </select>
+                            <input type="text" id="recipientInput" placeholder="직접 입력"
+                                   class="mt-2 p-2 border border-gray-300 rounded w-full" style="display: none;"/>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="title" class="block text-gray-700">제목:</label>
+                        <input type="text" id="title" name="title"
+                               class="mt-2 p-2 border border-gray-300 rounded w-full" required/>
+                    </div>
+                    <div class="mb-4">
+                        <label for="content" class="block text-gray-700">내용:</label>
+                        <textarea id="content" name="content" rows="4"
+                                  class="mt-2 p-2 border border-gray-300 rounded w-full" required></textarea>
+                    </div>
+                    <div class="text-right">
+                        <button id="sendMessageButton" class="px-4 py-2 bg-blue-500 text-white rounded">보내기</button>
+                    </div>
+                </div>
+
+                <div class="mt-6 text-right">
+                    <button id="closeMessageModal" class="px-4 py-2 bg-red-500 text-white rounded">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 친구 목록 모달 창 -->
+<div id="friendsModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl">
+            <div class="p-6">
+                <h2 class="text-2xl font-semibold mb-4">친구 목록</h2>
+
+                <!-- 탭 메뉴 -->
+                <div class="flex border-b mb-4">
+                    <button id="friendsListTab"
+                            class="px-4 py-2 text-gray-700 hover:bg-gray-200 focus:outline-none focus:bg-gray-200">
+                        친구 목록
+                    </button>
+                    <button id="receivedRequestsTab"
+                            class="px-4 py-2 text-gray-700 hover:bg-gray-200 focus:outline-none">받은 신청
+                    </button>
+                    <button id="sendRequestsTab"
+                            class="px-4 py-2 text-gray-700 hover:bg-gray-200 focus:outline-none">친구
+                        신청
+                    </button>
+                </div>
+
+                <!-- 친구 목록 내용 -->
+                <div id="friendsList" class="space-y-4">
+                    <!-- 친구 목록이 여기에 추가됩니다 -->
+                </div>
+
+                <!-- 받은 신청 -->
+                <div id="receivedRequestsContent" class="friend-content hidden">
+                    <ul id="receivedRequestsList" class="space-y-4">
+                        <!-- 받은 친구 신청 목록이 여기에 추가됩니다 -->
+                    </ul>
+                </div>
+
+                <!-- 친구 신청 -->
+                <div id="sendRequestsContent" class="friend-content hidden">
+                    <form id="sendFriendRequestForm">
+                        <div class="mb-4">
+                            <label for="friendUsername" class="block text-gray-700">요청 보낼 이름:</label>
+                            <input type="text" id="friendUsername" name="friendUsername"
+                                   class="mt-2 p-2 border border-gray-300 rounded w-full" required/>
+                        </div>
+                        <div class="mb-4">
+                            <label for="friendMessage" class="block text-gray-700">요청 메시지:</label>
+                            <textarea id="friendMessage" name="friendMessage" rows="4"
+                                      class="mt-2 p-2 border border-gray-300 rounded w-full"
+                                      placeholder="간단한 메시지를 작성해보세요." required></textarea>
+                        </div>
+                        <div class="text-right">
+                            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">신청하기</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="mt-6 text-right">
+                    <button id="closeFriendsModal" class="px-4 py-2 bg-red-500 text-white rounded">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-gray-200 text-gray-800 py-6 mt-auto">
+    <div class="container mx-auto px-4">
+        <div class="mb-4 border-b border-gray-300 pb-4">
+            <p class="text-sm">사업자등록번호: <span class="font-semibold">999-99-99999</span></p>
+            <p class="text-sm">우) 99999 서울특별시 강남구 역삼로4길 구구공빌딩 (역삼동) | Tel: <span
+                    class="font-semibold">02-999-9999</span></p>
+        </div>
+        <div>
+            <p class="text-sm font-semibold mb-2">고객상담실</p>
+            <p class="text-sm">회원문의: <span class="font-semibold">02-999-9998</span></p>
+            <p class="text-sm">기타문의: <span class="font-semibold">02-999-9999</span></p>
+        </div>
+        <div class="mb-4 border-b border-gray-300 pb-4">
+            <p class="text-sm">&copy; 2024 All Rights Reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- 스크립트 -->
+<th:block layout:fragment="script">
+    <script>
+        dataContainer = document.getElementById('data-container');
+        contextPath = dataContainer.getAttribute('data-my-variable');
+        contextPath = contextPath === null ? "" : contextPath;
+
+        console.log(contextPath)
+
+        // 모달 창 열기/닫기 스크립트
+        const messageModal = document.getElementById('messageModal');
+        const openMessageModal = document.getElementById('openMessageModal');
+        const closeMessageModal = document.getElementById('closeMessageModal');
+
+        openMessageModal.addEventListener('click', function () {
+            messageModal.classList.remove('hidden');
+        });
+
+        closeMessageModal.addEventListener('click', function () {
+            messageModal.classList.add('hidden');
+        });
+
+        // 모달 창 외부 클릭 시 닫기
+        window.addEventListener('click', function (event) {
+            if (event.target === messageModal) {
+                messageModal.classList.add('hidden');
+            }
+        });
+
+
+        // 친구 목록 모달 창 열기/닫기 스크립트
+        const friendsModal = document.getElementById('friendsModal');
+        const openFriendsModal = document.getElementById('openFriendsModal');
+        const closeFriendsModal = document.getElementById('closeFriendsModal');
+
+        openFriendsModal.addEventListener('click', function () {
+            friendsModal.classList.remove('hidden');
+        });
+
+        closeFriendsModal.addEventListener('click', function () {
+            friendsModal.classList.add('hidden');
+        });
+
+        // 모달 창 외부 클릭 시 닫기
+        window.addEventListener('click', function (event) {
+            if (event.target === messageModal) {
+                messageModal.classList.add('hidden');
+            }
+            if (event.target === friendsModal) {
+                friendsModal.classList.add('hidden');
+            }
+        });
+
+        // 탭 전환 스크립트
+        const receivedTab = document.getElementById('receivedTab');
+        const sentTab = document.getElementById('sentTab');
+        const sendMessageTab = document.getElementById('sendMessageTab');
+        const receivedMessages = document.getElementById('receivedMessages');
+        const sentMessages = document.getElementById('sentMessages');
+        const sendMessageForm = document.getElementById('sendMessageForm');
+
+        // 친구 목록 모달 창 탭 전환 스크립트
+        const friendsListTab = document.getElementById('friendsListTab');
+        const receivedRequestsTab = document.getElementById('receivedRequestsTab');
+        const sendRequestsTab = document.getElementById('sendRequestsTab');
+
+        const friendsListContent = document.getElementById('friendsList');
+        const receivedRequestsContent = document.getElementById('receivedRequestsContent');
+        const sendRequestsContent = document.getElementById('sendRequestsContent');
+
+        friendsListTab.addEventListener('click', function () {
+            friendsListContent.classList.remove('hidden');
+            receivedRequestsContent.classList.add('hidden');
+            sendRequestsContent.classList.add('hidden');
+
+            friendsListTab.classList.add('bg-gray-200');
+            receivedRequestsTab.classList.remove('bg-gray-200');
+            sendRequestsTab.classList.remove('bg-gray-200');
+        });
+
+
+        receivedTab.addEventListener('click', function () {
+            receivedMessages.classList.remove('hidden');
+            sentMessages.classList.add('hidden');
+            sendMessageForm.classList.add('hidden');
+            receivedTab.classList.add('bg-gray-200');
+            sentTab.classList.remove('bg-gray-200');
+            sendMessageTab.classList.remove('bg-gray-200');
+        });
+
+        sentTab.addEventListener('click', function () {
+            sentMessages.classList.remove('hidden');
+            receivedMessages.classList.add('hidden');
+            sendMessageForm.classList.add('hidden');
+            sentTab.classList.add('bg-gray-200');
+            receivedTab.classList.remove('bg-gray-200');
+            sendMessageTab.classList.remove('bg-gray-200');
+        });
+
+        sendMessageTab.addEventListener('click', function () {
+            sendMessageForm.classList.remove('hidden');
+            receivedMessages.classList.add('hidden');
+            sentMessages.classList.add('hidden');
+            sendMessageTab.classList.add('bg-gray-200');
+            receivedTab.classList.remove('bg-gray-200');
+            sentTab.classList.remove('bg-gray-200');
+        });
+
+        receivedRequestsTab.addEventListener('click', function () {
+            receivedRequestsContent.classList.remove('hidden');
+            friendsListContent.classList.add('hidden');
+            sendRequestsContent.classList.add('hidden');
+
+            receivedRequestsTab.classList.add('bg-gray-200');
+            friendsListTab.classList.remove('bg-gray-200');
+            sendRequestsTab.classList.remove('bg-gray-200');
+        });
+
+        sendRequestsTab.addEventListener('click', function () {
+            sendRequestsContent.classList.remove('hidden');
+            friendsListContent.classList.add('hidden');
+            receivedRequestsContent.classList.add('hidden');
+
+            sendRequestsTab.classList.add('bg-gray-200');
+            friendsListTab.classList.remove('bg-gray-200');
+            receivedRequestsTab.classList.remove('bg-gray-200');
+        });
+
+        // CSRF 토큰 가져오기
+        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+
+        // 친구 목록 드롭다운 메뉴에 친구 추가 로직
+        document.addEventListener('DOMContentLoaded', function () {
+            const recipientDropdown = document.getElementById('recipientDropdown');
+            const recipientInput = document.getElementById('recipientInput');
+
+            // 친구 목록을 드롭다운에 로드
+            fetch(`${contextPath}/friends/list`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken // CSRF 토큰을 헤더에 추가
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    recipientDropdown.innerHTML = '<option value="" disabled selected>친구를 선택하세요</option>';
+
+                    if (data.length > 0) {
+                        data.forEach(friend => {
+                            const option = document.createElement('option');
+                            option.value = friend.username;
+                            option.textContent = friend.username;
+                            recipientDropdown.appendChild(option);
+                        });
+                    } else {
+                        const noFriendsOption = document.createElement('option');
+                        noFriendsOption.value = '';
+                        noFriendsOption.disabled = true;
+                        noFriendsOption.textContent = '친구가 없습니다.';
+                        recipientDropdown.appendChild(noFriendsOption);
+                    }
+
+                    // "직접 입력" 옵션 추가
+                    const directInputOption = document.createElement('option');
+                    directInputOption.value = 'directInput';
+                    directInputOption.textContent = '직접 입력';
+                    recipientDropdown.appendChild(directInputOption);
+                })
+                .catch(error => console.error('Error fetching friends list:', error));
+
+            // 드롭다운 변경 시 동작
+            recipientDropdown.addEventListener('change', function () {
+                if (this.value === 'directInput') {
+                    recipientInput.style.display = 'block';
+                    recipientInput.focus();
+                } else {
+                    recipientInput.style.display = 'none';
+                    recipientInput.value = ''; // 텍스트 필드 초기화
+                }
+            });
+
+            // 쪽지 전송 로직
+            const sendMessageButton = document.getElementById('sendMessageButton');
+            sendMessageButton.addEventListener('click', function () {
+                let recipient = recipientDropdown.value;
+
+                // "직접 입력"이 선택된 경우 텍스트 입력 필드의 값을 사용
+                if (recipient === 'directInput') {
+                    recipient = recipientInput.value;
+                }
+
+                const title = document.getElementById('title').value;
+                const content = document.getElementById('content').value;
+
+                if (!recipient) {
+                    alert('수신자를 입력하거나 선택하세요.');
+                    return;
+                }
+
+                const messageData = {
+                    recipient: recipient,
+                    title: title,
+                    content: content
+                };
+
+                fetch(`${contextPath}/messages/send`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify(messageData)
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('메시지가 성공적으로 전송되었습니다.');
+                            messageModal.classList.add('hidden');
+                        } else if (response.status === 404) {
+                            alert('수신자를 찾을 수 없습니다.');
+                        } else {
+                            alert('메시지 전송에 실패했습니다.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('메시지 전송 중 오류가 발생했습니다.');
+                    });
+            });
+        });
+
+        // 받은 쪽지
+        document.addEventListener('DOMContentLoaded', function () {
+            const username = document.getElementById('hiddenIdValue').value; // userId를 username으로 사용
+            const receivedMessagesBody = document.getElementById('receivedMessagesBody');
+            const miniMessageModal = document.getElementById('miniMessageModal');
+            const modalSender = document.getElementById('modalSender');
+            const modalContent = document.getElementById('modalContent');
+            const closeMiniModal = document.getElementById('closeMiniModal');
+
+            fetch(`${contextPath}/messages/received?username=${username}`)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Failed to load received messages.');
+                    }
+                })
+                .then(messages => {
+                    receivedMessagesBody.innerHTML = ''; // 기존 내용 제거
+                    if (messages.length === 0) {
+                        const noMessageElement = document.createElement('tr');
+                        noMessageElement.innerHTML = `
+                    <td colspan="3" class="py-2 px-4 text-center text-gray-600">받은 쪽지가 없습니다.</td>
+                `;
+                        receivedMessagesBody.appendChild(noMessageElement);
+                    } else {
+                        messages.forEach(message => {
+                            const messageRow = document.createElement('tr');
+                            messageRow.className = 'border-b cursor-pointer'; // 클릭 가능하도록 커서 변경
+
+                            const senderElement = document.createElement('td');
+                            senderElement.className = 'py-2 px-4';
+                            senderElement.textContent = message.senderUsername;
+
+                            const titleElement = document.createElement('td');
+                            titleElement.className = 'py-2 px-4 truncate max-w-xs';
+                            titleElement.textContent = message.title;
+
+                            const contentElement = document.createElement('td');
+                            contentElement.className = 'py-2 px-4 truncate max-w-sm';
+                            contentElement.textContent = message.content;
+
+                            messageRow.appendChild(senderElement);
+                            messageRow.appendChild(titleElement);
+                            messageRow.appendChild(contentElement);
+
+                            // 클릭 이벤트 리스너 추가
+                            messageRow.addEventListener('click', function () {
+                                modalSender.textContent = `작성자: ${message.senderUsername}`;
+                                modalContent.textContent = `내용: ${message.content}`;
+                                miniMessageModal.classList.remove('hidden');
+                            });
+
+                            receivedMessagesBody.appendChild(messageRow);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const errorMessageElement = document.createElement('tr');
+                    errorMessageElement.innerHTML = `
+                <td colspan="3" class="py-2 px-4 text-center text-red-500">쪽지를 불러올 수 없습니다.</td>
+            `;
+                    receivedMessagesBody.appendChild(errorMessageElement);
+                });
+
+            // 모달 닫기 버튼 이벤트 리스너
+            closeMiniModal.addEventListener('click', function () {
+                miniMessageModal.classList.add('hidden');
+            });
+
+            // 모달 창 외부 클릭 시 닫기
+            window.addEventListener('click', function (event) {
+                if (event.target === miniMessageModal) {
+                    miniMessageModal.classList.add('hidden');
+                }
+            });
+        });
+
+        // 보낸 쪽지
+        document.addEventListener('DOMContentLoaded', function () {
+            const username = document.getElementById('hiddenIdValue').value; // userId를 username으로 사용
+            const sentMessagesBody = document.getElementById('sentMessagesBody');
+            const miniSentMessageModal = document.getElementById('miniSentMessageModal');
+            const modalSentReceiver = document.getElementById('modalSentReceiver');
+            const modalSentContent = document.getElementById('modalSentContent');
+            const closeMiniSentModal = document.getElementById('closeMiniSentModal');
+
+            fetch(`${contextPath}/messages/sent?username=${username}`)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Failed to load sent messages.');
+                    }
+                })
+                .then(messages => {
+                    sentMessagesBody.innerHTML = ''; // 기존 내용 제거
+                    if (messages.length === 0) {
+                        const noMessageElement = document.createElement('tr');
+                        noMessageElement.innerHTML = `
+                    <td colspan="3" class="py-2 px-4 text-center text-gray-600">보낸 쪽지가 없습니다.</td>
+                `;
+                        sentMessagesBody.appendChild(noMessageElement);
+                    } else {
+                        messages.forEach(message => {
+                            const messageRow = document.createElement('tr');
+                            messageRow.className = 'border-b cursor-pointer'; // 클릭 가능하도록 커서 변경
+
+                            const receiverElement = document.createElement('td');
+                            receiverElement.className = 'py-2 px-4';
+                            receiverElement.textContent = message.receiverUsername;
+
+                            const titleElement = document.createElement('td');
+                            titleElement.className = 'py-2 px-4 truncate max-w-xs';
+                            titleElement.textContent = message.title;
+
+                            const contentElement = document.createElement('td');
+                            contentElement.className = 'py-2 px-4 truncate max-w-sm';
+                            contentElement.textContent = message.content;
+
+                            messageRow.appendChild(receiverElement);
+                            messageRow.appendChild(titleElement);
+                            messageRow.appendChild(contentElement);
+
+                            // 클릭 이벤트 리스너 추가
+                            messageRow.addEventListener('click', function () {
+                                modalSentReceiver.textContent = `받은 사람: ${message.receiverUsername}`;
+                                modalSentContent.textContent = `내용: ${message.content}`;
+                                miniSentMessageModal.classList.remove('hidden');
+                            });
+
+                            sentMessagesBody.appendChild(messageRow);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.log('username', username);
+                    console.error('Error:', error);
+                    const errorMessageElement = document.createElement('tr');
+                    errorMessageElement.innerHTML = `
+                <td colspan="3" class="py-2 px-4 text-center text-red-500">쪽지를 불러올 수 없습니다.</td>
+            `;
+                    sentMessagesBody.appendChild(errorMessageElement);
+                });
+
+            // 모달 닫기 버튼 이벤트 리스너
+            closeMiniSentModal.addEventListener('click', function () {
+                miniSentMessageModal.classList.add('hidden');
+            });
+
+            // 모달 창 외부 클릭 시 닫기
+            window.addEventListener('click', function (event) {
+                if (event.target === miniSentMessageModal) {
+                    miniSentMessageModal.classList.add('hidden');
+                }
+            });
+        });
+
+        // 모달 창 외부 클릭 시 닫기
+        window.addEventListener('click', function (event) {
+            if (event.target === miniSentMessageModal) {
+                miniSentMessageModal.classList.add('hidden');
+            }
+        });
+
+        // 프로필 이미지 등록 로직
+        document.querySelector('#uploadForm').addEventListener('submit', function (event) {
+            document.getElementById('uploadForm').submit();
+            event.preventDefault(); // 기본 제출 동작 방지
+
+            const formData = new FormData(this);
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+                .then(response => response.json())  // JSON으로 응답을 받음
+                .then(data => {
+                    const imageElement = document.querySelector('img#profileImages');
+                    if (data.imageUrl) {
+                        const timestamp = new Date().getTime();
+                        const newImageUrl = `${contextPath}${data.imageUrl}?t=${timestamp}`;
+                        imageElement.src = newImageUrl;  // 이미지 URL 업데이트
+                    } else {
+                        // 이미지가 없을 경우 기본 이미지를 설정
+                        imageElement.src = `${contextPath}/images/default_profile.jpeg`;
+                        alert('업로드에 실패했습니다. 기본 프로필 이미지가 설정되었습니다.');
+                    }
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('이미지가 변경되었습니다.')
+                    // alert('업로드 중 오류가 발생했습니다.');
+                    // 업로드 실패 시 기본 이미지 설정
+                    document.querySelector('img#profileImages').src = `${contextPath}/images/default_profile.jpeg`;
+                });
+        });
+
+
+        // 친구 신청 전송
+        const sendFriendRequestForm = document.getElementById('sendFriendRequestForm');
+        sendFriendRequestForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const friendUsername = document.getElementById('friendUsername').value;
+            const friendMessage = document.getElementById('friendMessage').value;
+
+            const requestData = {
+                friendUsername: friendUsername,
+                friendMessage: friendMessage
+            };
+
+            fetch(`${contextPath}/friends/request`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken // CSRF 토큰을 헤더에 추가
+                },
+                body: JSON.stringify(requestData)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('친구 신청이 성공적으로 전송되었습니다.');
+                        sendFriendRequestForm.reset(); // 폼 초기화
+                    } else if (response.status === 404) {
+                        alert('해당 사용자를 찾을 수 없습니다.');
+                    } else if (response.status === 400) {
+                        alert('이미 요청을 받았거나, 요청할 수 없는 회원입니다.');
+                    } else {
+                        alert('친구 신청 중 오류가 발생했습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('친구 신청 중 오류가 발생했습니다.');
+                });
+        });
+
+        // 받은 신청
+        receivedRequestsTab.addEventListener('click', function () {
+            receivedRequestsContent.classList.remove('hidden');
+            friendsListContent.classList.add('hidden');
+            sendRequestsContent.classList.add('hidden');
+
+            receivedRequestsTab.classList.add('bg-gray-200');
+            friendsListTab.classList.remove('bg-gray-200');
+            sendRequestsTab.classList.remove('bg-gray-200');
+
+            // 받은 친구 요청을 서버에서 가져오는 로직
+            fetch(`${contextPath}/friends/received`, {
+                method: 'GET',
+                headers: {
+                    [csrfHeader]: csrfToken // CSRF 토큰을 헤더에 추가
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const receivedRequestsList = document.getElementById('receivedRequestsList');
+                    receivedRequestsList.innerHTML = ''; // 기존 리스트 초기화
+
+                    if (data.length === 0) {
+                        receivedRequestsList.innerHTML = '<li class="py-2 border-b text-center text-gray-600">받은 친구 신청이 없습니다.</li>';
+                    } else {
+                        data.forEach(request => {
+                            const listItem = document.createElement('li');
+                            listItem.className = 'py-2 border-b flex justify-between items-center';
+                            listItem.innerHTML = `
+                        <span>${request.friendUsername} - ${request.friendMessage}</span>
+                        <div>
+                            <button class="accept-btn bg-green-500 text-white px-4 py-1 rounded mr-2" data-request-id="${request.id}">수락</button>
+                            <button class="reject-btn bg-red-500 text-white px-4 py-1 rounded" data-request-id="${request.id}">거절</button>
+                        </div>
+                    `;
+                            receivedRequestsList.appendChild(listItem);
+                        });
+
+                        // 수락 버튼 이벤트 리스너 추가
+                        document.querySelectorAll('.accept-btn').forEach(button => {
+                            button.addEventListener('click', function () {
+                                const requestId = this.getAttribute('data-request-id');
+                                fetch(`${contextPath}/friends/accept?requestId=${requestId}`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        [csrfHeader]: csrfToken // CSRF 토큰을 헤더에 추가
+                                    }
+                                })
+                                    .then(response => {
+                                        if (response.ok) {
+                                            alert('친구 요청을 수락했습니다.');
+                                            this.closest('li').remove(); // 리스트에서 해당 항목 제거
+                                        } else {
+                                            alert('친구 요청 수락에 실패했습니다.');
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error:', error);
+                                    });
+                            });
+                        });
+
+                        // 거절 버튼 이벤트 리스너 추가
+                        document.querySelectorAll('.reject-btn').forEach(button => {
+                            button.addEventListener('click', function () {
+                                const requestId = this.getAttribute('data-request-id');
+                                fetch(`${contextPath}/friends/reject?requestId=${requestId}`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        [csrfHeader]: csrfToken // CSRF 토큰을 헤더에 추가
+                                    }
+                                })
+                                    .then(response => {
+                                        if (response.ok) {
+                                            alert('친구 요청을 거절했습니다.');
+                                            this.closest('li').remove(); // 리스트에서 해당 항목 제거
+                                        } else {
+                                            alert('친구 요청 거절에 실패했습니다.');
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error:', error);
+                                    });
+                            });
+                        });
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        // 친구 목록 불러오기 및 표시
+        friendsListTab.addEventListener('click', function () {
+            friendsListContent.classList.remove('hidden');
+            receivedRequestsContent.classList.add('hidden');
+            sendRequestsContent.classList.add('hidden');
+
+            friendsListTab.classList.add('bg-gray-200');
+            receivedRequestsTab.classList.remove('bg-gray-200');
+            sendRequestsTab.classList.remove('bg-gray-200');
+
+            // 친구 목록을 서버에서 가져오는 로직
+            fetch(`${contextPath}/friends/list`, {
+                method: 'GET',
+                headers: {
+                    [csrfHeader]: csrfToken // CSRF 토큰을 헤더에 추가
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const friendsList = document.getElementById('friendsList');
+                    friendsList.innerHTML = ''; // 기존 리스트 초기화
+
+                    if (data.length === 0) {
+                        friendsList.innerHTML = '<li class="py-2 border-b text-center text-gray-600">친구가 없습니다.</li>';
+                    } else {
+                        data.forEach(friend => {
+                            const listItem = document.createElement('li');
+                            listItem.className = 'py-2 border-b flex justify-between items-center';
+                            listItem.innerHTML = `
+                        <span>${friend.username}</span>
+                        <input hidden="hidden" value="${friend.id}" id="frienId">
+                        <button class="start-chat-btn bg-gray-200 text-black px-4 py-1 rounded" data-friend-id="${friend.id}" onclick="startChat(this)">대화 시작</button>
+                        <button class="wishlist-btn bg-blue-500 text-white px-4 py-1 rounded" data-friend-id="${friend.id}">위시리스트 방문</button>
+                    `;
+                            friendsList.appendChild(listItem);
+                        });
+
+                        // // 대화 시작 버튼에 이벤트 리스너 추가
+                        // document.querySelectorAll('.start-chat-btn').forEach(button => {
+                        //     button.addEventListener('click', function () {
+                        //         // 대화 시작 로직을 여기에 추가
+                        //         const friendUsername = this.parentElement.querySelector('span').textContent;
+                        //         alert(friendUsername + '님과의 대화가 시작되었습니다.');
+                        //         // 추가적으로 대화 창을 열거나 다른 대화 시작 로직을 여기에 작성
+                        //     });
+                        // });
+
+                        // 위시리스트 방문 버튼에 이벤트 리스너 추가
+                        document.querySelectorAll('.wishlist-btn').forEach(button => {
+                            button.addEventListener('click', function () {
+                                const friendId = this.getAttribute('data-friend-id');
+                                window.location.href = `${contextPath}/wishlist/${friendId}`;
+                            });
+                        });
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const profileImages = document.getElementById('profileImages');
+            const noImageText = document.getElementById('noImageText');
+            const userId = document.getElementById('hiddenIdValue').value;
+            const defaultImageUrl = `${contextPath}/images/default_profile.jpeg`; // 기본 이미지 URL
+
+            console.log('profileImages ??? ' + profileImages)
+            console.log('profileImages ??? ' + profileImages)
+            console.log('defaultImageUrl ??? ' + defaultImageUrl)
+
+            // 이미지 로드
+            fetch(`${contextPath}/mypage/${userId}/profile-image`)
+                .then(response => {
+                    if (response.ok) {
+                        return response.blob(); // 이미지 데이터를 blob으로 변환
+                    } else {
+                        throw new Error('이미지를 불러올 수 없습니다.');
+                    }
+                })
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    profileImages.src = url; // 이미지 src에 blob URL을 할당
+                    noImageText.style.display = 'none'; // 텍스트 숨김
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    profileImages.src = defaultImageUrl; // 오류 발생 시 기본 이미지로 설정
+                    noImageText.style.display = 'none'; // 텍스트 숨김
+                });
+        });
+
+
+        // document.addEventListener('DOMContentLoaded', () => {
+        //     // 대화 시작 버튼 클릭 시
+        //     document.querySelectorAll('.start-chat-btn').forEach(button => {
+        //         button.addEventListener('click', function() {
+        //             const recipientId = this.getAttribute('data-friend-id');
+        //             console.log('Button clicked. Recipient ID:', recipientId);  // 이 부분으로 로그를 확인하세요.
+        //             window.location.href = `/chat?recipientId=${recipientId}`;
+        //         });
+        //     });
+        // });
+
+
+        function startChat(button) {
+            // 버튼과 같은 부모 요소 내에 있는 숨겨진 입력 필드를 찾습니다.
+            const recipientId = button.previousElementSibling.value;
+
+            // 로그 출력 (디버깅용)
+            console.log('Button clicked. Recipient ID:', recipientId);
+
+            // recipientId를 사용하여 페이지 이동
+            window.location.href = `${contextPath}/chat?recipientId=${recipientId}`;
+        }
+
+    </script>
+</th:block>
+
+</body>
+</html>

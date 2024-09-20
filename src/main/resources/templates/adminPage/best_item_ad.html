@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html layout:decorate="~{adminPage/layout_ad}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>인기 아이템 분석</title>
+</head>
+<body>
+<div layout:fragment="content_ad" class="container my-3">
+    <h1 class="h2">인기 아이템 분석</h1>
+    <canvas id="wishlistChart" width="400" height="200"></canvas>
+    <div id="productList"></div>
+</div>
+
+<th:block layout:fragment="script">
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const statistics = /*[[${statistics}]]*/ [];
+    /*]]>*/
+
+    function renderChart(data) {
+        const ctx = document.getElementById('wishlistChart').getContext('2d');
+        const labels = data.map(item => item.title);
+        const counts = data.map(item => item.count);
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '상품 개수',
+                    data: counts,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        display: false // X축 레이블(상품명) 숨기기
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+
+    function renderProductList(data) {
+        const productList = document.getElementById('productList');
+        productList.innerHTML = '';  // 기존 목록을 비웁니다.
+        data.forEach(item => {
+            const productDiv = document.createElement('div');
+            productDiv.className = 'product-item';
+            productDiv.innerHTML = `
+            <p><strong>순위: ${item.rank}</strong></p>
+            <img src="${item.image}" alt="${item.title}" style="width:100px; height:100px;">
+            <a href="${item.link}" target="_blank">${item.title}</a>
+            <p>가격: ${item.lprice}원</p>
+            <p>위시리스트에 담긴 수: ${item.count}</p>
+        `;
+            productList.appendChild(productDiv);
+        });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log("Statistics: ", statistics);  // 콘솔에 데이터 출력
+        renderChart(statistics);
+        renderProductList(statistics);
+    });
+</script>
+</th:block>
+
+<!-- Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

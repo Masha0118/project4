@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html layout:decorate="~{adminPage/layout_ad}">
+<head>
+    <title>Keyword Statistics</title>
+    <style>
+        .btn.active {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content_ad" class="container mt-5">
+    <div id="data-container" th:data-my-variable="${contextPath}"></div>
+    <h1 class="mb-4">키워드 통계</h1>
+
+    <!-- 검색어 통계 데이터 테이블 -->
+    <div class="table-responsive mb-5">
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>키워드</th>
+                <th>검색 날짜</th>
+            </tr>
+            </thead>
+            <tbody id="keywordStatisticsTableBody">
+            <!-- 데이터가 여기에 추가될 것입니다. -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 페이지 네이션 컨트롤 -->
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul id="pagination" class="pagination justify-content-center">
+            <!-- 페이지 네이션이 여기에 추가될 것입니다. -->
+        </ul>
+    </nav>
+
+    <!-- 월간 데이터 드롭다운 메뉴 -->
+    <div class="mb-4 flex space-x-2">
+        <div>
+            <select id="monthDropdown" class="bg-blue-500 text-black px-4 py-2 rounded">
+                <option value="1">1월</option>
+                <option value="2">2월</option>
+                <option value="3">3월</option>
+                <option value="4">4월</option>
+                <option value="5">5월</option>
+                <option value="6">6월</option>
+                <option value="7">7월</option>
+                <option value="8">8월</option>
+                <option value="9">9월</option>
+                <option value="10">10월</option>
+                <option value="11">11월</option>
+                <option value="12">12월</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- 검색어 빈도 그래프 -->
+    <canvas id="keywordChart" width="400" height="200"></canvas>
+</div>
+
+<!-- Script 블록 -->
+<th:block layout:fragment="script">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const dataContainer = document.getElementById('data-container');
+            contextPath = dataContainer.getAttribute('data-my-variable') || "";
+            contextPath = contextPath === null ? "" : contextPath;
+
+            // Chart.js 그래프 초기화
+            const ctx = document.getElementById('keywordChart').getContext('2d');
+            const keywordChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],  // 초기 레이블
+                    datasets: [{
+                        label: 'Keyword Frequency',
+                        data: [],  // 초기 데이터
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+
+            function updateChart(labels, data, label) {
+                keywordChart.data.labels = labels;
+                keywordChart.data.datasets[0].data = data;
+                keywordChart.data.datasets[0].label = label;
+                keywordChart.update();
+            }
+
+            // 현재 달을 가져옴
+            const currentMonth = new Date().getMonth() + 1;
+
+            // Fetch 월간 데이터를 가져옴
+            fetch(`${contextPath}/admin/logs/monthly-keyword-statistics`)
+                .then(response => response.json())
+                .then(monthlyKeywordStatistics => {
+                    console.log('Monthly Keyword Statistics:', monthlyKeywordStatistics); // 콘솔에 데이터를 출력
+
+                    // 월간 데이터 준비 함수
+                    function getMonthlyData(month) {
+                        const daysOfMonth = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+                        return daysOfMonth.map(day => (monthlyKeywordStatistics[month] && monthlyKeywordStatistics[month][day]) || 0);
+                    }
+
+                    // 초기화 시 현재 달 데이터를 기본으로 차트 설정
+                    const monthlyData = getMonthlyData(currentMonth);
+                    const daysOfMonth = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+                    updateChart(daysOfMonth, monthlyData, `${currentMonth}월 키워드 그래프`);
+
+                    document.getElementById('monthDropdown').value = currentMonth;
+
+                    // 드롭다운 메뉴 선택 이벤트 처리
+                    document.getElementById('monthDropdown').addEventListener('change', function() {
+                        const selectedMonth = this.value;
+                        const monthlyData = getMonthlyData(selectedMonth);
+                        updateChart(daysOfMonth, monthlyData, `${selectedMonth}월 키워드 그래프`);
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+
+            // 페이지 네이션 및 테이블 데이터 렌더링
+            fetch(`${contextPath}/admin/logs/keyword-statistics`)
+                .then(response => response.json())
+                .then(keywordStatisticsList => {
+                    const rowsPerPage = 10;
+                    keywordStatisticsList = keywordStatisticsList.reverse();  // 데이터 역순으로 정렬
+                    const totalPages = Math.ceil(keywordStatisticsList.length / rowsPerPage);
+                    let currentPage = 1;
+                    let paginationGroup = 0;
+
+                    function renderTablePage(page) {
+                        const start = (page - 1) * rowsPerPage;
+                        const end = start + rowsPerPage;
+                        const tableBody = document.getElementById('keywordStatisticsTableBody');
+                        tableBody.innerHTML = '';
+
+                        keywordStatisticsList.slice(start, end).forEach(stat => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                        <td>${stat.id}</td>
+                        <td>${stat.keyword}</td>
+                        <td>${new Date(stat.date).toISOString().split('T')[0]}</td>
+                    `;
+                            tableBody.appendChild(row);
+                        });
+                    }
+
+                    function renderPagination() {
+                        const pagination = document.getElementById('pagination');
+                        pagination.innerHTML = '';
+
+                        const prevLi = document.createElement('li');
+                        prevLi.classList.add('page-item');
+                        prevLi.innerHTML = `
+                    <a class="page-link" href="#" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                `;
+                        prevLi.classList.toggle('disabled', currentPage === 1);
+                        prevLi.addEventListener('click', function(event) {
+                            event.preventDefault();
+                            if (currentPage > 1) {
+                                currentPage--;
+                                if (currentPage % 10 === 0) paginationGroup--;
+                                renderTablePage(currentPage);
+                                renderPagination();
+                            }
+                        });
+                        pagination.appendChild(prevLi);
+
+                        const startPage = paginationGroup * 10 + 1;
+                        const endPage = Math.min(startPage + 9, totalPages);
+
+                        for (let i = startPage; i <= endPage; i++) {
+                            const li = document.createElement('li');
+                            li.classList.add('page-item');
+                            if (i === currentPage) li.classList.add('active');
+                            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                            li.addEventListener('click', function(event) {
+                                event.preventDefault();
+                                currentPage = i;
+                                renderTablePage(currentPage);
+                                renderPagination();
+                            });
+                            pagination.appendChild(li);
+                        }
+
+                        const nextLi = document.createElement('li');
+                        nextLi.classList.add('page-item');
+                        nextLi.innerHTML = `
+                    <a class="page-link" href="#" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                `;
+                        nextLi.classList.toggle('disabled', currentPage === totalPages);
+                        nextLi.addEventListener('click', function(event) {
+                            event.preventDefault();
+                            if (currentPage < totalPages) {
+                                currentPage++;
+                                if ((currentPage - 1) % 10 === 0) paginationGroup++;
+                                renderTablePage(currentPage);
+                                renderPagination();
+                            }
+                        });
+                        pagination.appendChild(nextLi);
+                    }
+
+                    // 초기화
+                    renderTablePage(currentPage);
+                    renderPagination();
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        });
+
+    </script>
+</th:block>
+
+</body>
+</html>
