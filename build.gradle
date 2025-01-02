@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.mysite'
-version = '0.0.3.5'
+version = '0.0.6'
 
 java {
 	sourceCompatibility = '17'

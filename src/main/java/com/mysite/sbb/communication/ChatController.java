@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.HtmlUtils;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -36,6 +37,14 @@ public class ChatController {
     public ChatMessageDto sendMessage(ChatMessageDto message, Principal principal) {
         String currentUsername = principal.getName();
         message.setSender(currentUsername);
+
+        String sanitizedContent = sanitizeMessageContent(message.getContent());
+
+        // 메시지 길이 제한 (예: 500자 이하)
+        if (sanitizedContent.length() > 500) {
+            // 메시지가 너무 길면 처리
+            sanitizedContent = sanitizedContent.substring(0, 500);
+        }
 
         // 채팅방 이름을 알파벳 순서로 정렬하여 생성
         String chatRoomName = createChatRoomName(currentUsername, message.getRecipient());
@@ -116,5 +125,14 @@ public class ChatController {
         } else {
             return user2 + "_" + user1;
         }
+    }
+
+    // 메시지 내용 검증 및 이스케이핑 함수
+    private String sanitizeMessageContent(String content) {
+        if (content == null) {
+            return "";
+        }
+        // Spring의 HtmlUtils를 사용하여 HTML 이스케이핑 처리
+        return HtmlUtils.htmlEscape(content);
     }
 }

@@ -88,7 +88,8 @@ public class SecurityConfig {
 			http.securityMatcher("/test/**", "/api/**", "/", "/user/**", "/question/**", "/answer/**",
 							"/cscenter/**", "/myshopping/**", "/home/**", "/product/**", "/myhistory/**",
 							"/productlist/**", "/wishlist/**", "/mypage/**", "/messages/**", "/portfolio/**",
-							"/friends/**", "/comparison/**", "/profileImage/**", "/images/**", "/api-ssl/**", "/cart/**", "/chat/**", "/ws/**", "/wss/**")  // /cart/** 추가
+							"/friends/**", "/comparison/**", "/profileImage/**", "/images/**", "/api-ssl/**",
+							"/cart/**", "/chat/**", "/ws/**", "/wss/**", "/verify-captcha/**", "/check-rate-limit/**")  // /cart/** 추가
 
 
 					.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests

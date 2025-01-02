@@ -14,6 +14,8 @@
     <!-- Flowbite (if needed) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.js"></script>
 
+
+
     <!-- Your Custom Stylesheet -->
     <title>WishLink</title>
 
@@ -70,13 +72,18 @@
             <p class="text-sm">&copy; 2024 Company Name. All Rights Reserved.</p>
             <p class="text-sm">개인정보 처리방침 | 이용약관</p>
         </div>
+
+        <!-- 리캡챠 버튼 -->
     </div>
 </footer>
+
 <th:block layout:fragment="script"></th:block>
 <!-- Scripts -->
+<script src="https://www.google.com/recaptcha/api.js?render=6Lf345EqAAAAAF9PchwuveYHT-wH-zgzU7uvsW6e"></script>
 <script th:src="@{/bootstrap.min.js}"></script>
 
 
 </body>
+<script src="/wishlink/js/recaptchaPost.js"></script>
 
 </html>

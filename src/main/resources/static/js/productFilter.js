@@ -6,8 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	contextPath = dataContainer.getAttribute('data-my-variable');
 	contextPath = contextPath === null ? "" : contextPath;
 	
-	console.log(contextPath)
-	
+
     // 상위 컨테이너에 이벤트 리스너 등록
     document.body.addEventListener('click', (event) => {
         // 클릭된 요소가 드롭다운 버튼인지 확인

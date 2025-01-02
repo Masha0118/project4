@@ -248,9 +248,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             fetch(uri)
                 .then(response => {
+                    if (response.status === 429) { // HTTP 429 상태 코드 확인
+                        return response.text().then(text => {
+                            // 경고창 표시
+                            alert("요청이 너무 많습니다. 잠시 후 다시 시도해주세요.");
+                            throw new Error('Too Many Requests');
+                        });
+                    }
+
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
+
                     return response.json();
                 })
                 .then(data => {
